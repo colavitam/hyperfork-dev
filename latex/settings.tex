@@ -1,0 +1,72 @@
+%Standard packages
+\usepackage{balance}
+\usepackage{color}
+%\usepackage{graphicx} %For advances graphics 
+%\usepackage{amsmath} %For advanced math symbols
+%\usepackage{algorithm2e} %For writing algorithms
+%\usepackage{algorithmic} %For the algorithmic environment
+
+%Collaboration
+\usepackage{fixme}
+%Showing notes only if on draft mode
+\ifDRAFT
+	\fxsetup{
+	    status=draft,
+    	author={Note},
+	    layout=inline,
+    	theme=color,
+	    silent=true,
+	}
+\else
+	\fxsetup{
+    	status=final,
+    	author={Note},
+	    layout=pdfnote,
+    	theme=color,
+	    silent=true,
+    	inline=false
+	}
+\fi
+
+\FXRegisterAuthor{stratos}{astratos}{TODO(si)}
+\FXRegisterAuthor{mike}{amike}{\color{blue}{TODO(msk)}}
+\FXRegisterAuthor{mark}{amark}{\color{green}{TODO(msk)}}
+\newcommand{\si}[1]{\stratoserror{#1}}
+\newcommand{\msk}[1]{\mikeerror{#1}}
+\newcommand{\mw}[1]{\markerror{#1}}
+
+
+%Reduce size tools
+%Uncommenting pslatex reduces size 
+%\usepackage{pslatex}
+
+
+%Add page numbering if needed
+%\pagenumbering{arabic}
+
+
+%Custom commands
+%Boldfaced paragraph
+\newcommand{\Paragraph}[1]{\vspace{1.5 mm} \noindent {\bf #1.}}
+\newcommand{\ParagraphQ}[1]{\vspace{1.5 mm} \noindent {\bf #1?}}
+%Putting figures
+\newcommand{\putfigure}[7]
+{
+\begin{figure}[#1]
+\centerline{$
+\includegraphics[#2]{#3}
+$}
+\vspace{#4}
+\caption{#5}
+\label{#6}
+\vspace{#7}
+\end{figure}
+}
+
+
+
+%To signify newly added text
+\newcommand{\newtext}[1]{{\color{blue} #1}}
+%\renewcommand{\newtext}[1]{#1}
+
+

@@ -1,0 +1,98 @@
+% Setting up the conference
+% Do not edit!
+\newif\ifSIGMOD
+\SIGMODfalse
+\newif\ifVLDB
+\VLDBfalse
+\newif\ifDRAFT
+\DRAFTfalse
+\newif\ifARTICLE
+\ARTICLEfalse
+%%%%%%%%%%%
+
+
+%%%%%%%%%%%
+%Set the type of the document (only one)
+\SIGMODtrue
+%\ARTICLEtrue
+%\VLDBtrue
+%%%%%%%%%%%
+
+%%%%%%%%%%%
+%Set whether you want to see the draft version
+\DRAFTtrue %control
+%%%%%%%%%%%
+
+\input{init.tex}
+
+%%%%%%%%%%%
+% Setting up the conference
+\documentclass[\varDraft]{\templateName} 
+%%%%%%%%%%%
+
+%%%%%%%%%%%
+% WATERMARK
+%Fill-in text for side text and watermark
+%\newcommand{\sidetext}[0]{\textcopyright 2015 - DASlab - Do Not Distribute}
+%\newcommand{\watermark}[0]{DRAFT}
+%%\renewcommand{\sidetext}[0]{}
+%%\renewcommand{\watermark}[0]{}
+%Using above commands to make watermark
+%\input{watermark.tex}
+%End of watermark
+%%%%%%%%%%%
+
+%%%%%%%%%%%
+%Packages, settings and custom commands
+\input{settings.tex}
+%%%%%%%%%%%
+
+\begin{document}
+\title{Title of the Paper}
+\input{authors.tex}
+\maketitle
+
+%%%%%%%%%%%
+%Examples for figure using custom command:
+%\putfigure{1-location}{2-size/options}{3-path}{4-vspace between image and caption}{5-caption}{6-label}{7-vspace below caption}
+%\putfigure{t}{width=\columnwidth}{./figures/fig1.pdf}{-0.1in}{This is caption}{fig:label}{-0.1in}
+%\putfigure{t}{draft,width=\columnwidth}{./figures/fig1.pdf}{-0.1in}{This is caption}{fig:label}{-0.1in}
+%%%%%%%%%%%
+
+
+\begin{abstract}
+\input{0-abstract.tex}
+\end{abstract}
+
+\input{1-introduction.tex}
+%\input{2-background.tex}
+\input{3-design.tex}
+\input{4-experiments.tex}
+\input{5-related.tex}
+\input{6-conclusions.tex}
+\input{7-acknowledgments.tex}
+
+\fxnote{Make sure we have the updated version of the conference style}
+
+\balance
+
+%%%%%%%%%%%
+% you need to run "make fetch-library" in order to copy library in this directory
+\input{biblio.tex}
+%%%%%%%%%%%
+
+
+
+%In some submission we can have an appendix for additional material/proofs
+\appendix
+\input{Appendix.tex}
+
+\ifDRAFT
+	\section{List of fixmes}
+	\listoffixmes
+\fi
+%In revisions in case we need to add feedback we need an extra section
+%\newpage
+%\input{feedback.tex}
+
+\end{document}

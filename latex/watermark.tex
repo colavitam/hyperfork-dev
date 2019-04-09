@@ -1,0 +1,20 @@
+%%%%%%%%%%%%
+%Code for the watermark
+\usepackage{type1cm,eso-pic}
+\makeatletter
+\AddToShipoutPicture{%
+\setlength{\@tempdimb}{.5\paperwidth}%
+\setlength{\@tempdimc}{.5\paperheight}%
+\setlength{\unitlength}{1pt}%
+\put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+
+\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.9}%
+{\fontsize{3cm}{3cm}\selectfont{ \watermark }}}}%
+
+\makebox(-550,0){\rotatebox{90}{\textcolor[gray]{0.75}%
+{\fontsize{0.7cm}{0.7cm}\selectfont{ \sidetext }}}}
+
+}%
+}
+\makeatother
+%%%%%%%%%%

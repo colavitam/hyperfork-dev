@@ -1,0 +1,34 @@
+ 
+\newcommand{\templateName}[0]{}
+\newcommand{\varDraft}[0]{}
+\ifDRAFT
+	\renewcommand{\varDraft}[0]{draft}
+\fi
+\ifARTICLE
+	\renewcommand{\templateName}[0]{article}
+\fi
+\ifSIGMOD
+	\renewcommand{\templateName}[0]{sig-alternate-05-2015}
+\fi
+\ifVLDB
+	\renewcommand{\templateName}[0]{vldb}
+\fi
+
+\ifSIGMOD
+	\ifARTICLE
+		\PackageError{DASlab}{Please use only one document type}{Set only one of the VLDB/SIGMOD/ARTICLE}
+		\stop
+	\fi
+\fi
+\ifVLDB
+	\ifARTICLE
+		\PackageError{DASlab}{Please use only one document type}{Set only one of the VLDB/SIGMOD/ARTICLE}
+		\stop
+	\fi
+\fi
+\ifVLDB
+	\ifSIGMOD
+		\PackageError{DASlab}{Please use only one document type}{Set only one of the VLDB/SIGMOD/ARTICLE}
+		\stop
+	\fi
+\fi
