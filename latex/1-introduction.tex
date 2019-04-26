@@ -2,13 +2,13 @@
 % above command is so that compilation is always from top.tex
 \section{Introduction \& Motivation} \label{sec:intro}
 \Paragraph{Serverless Computing}
-It's great, everyone wants it.
+Serverless computing, also known as Functions-as-a-Service, has become an increasingly important and desirable platform in the cloud ecosystem. Options are available from all of the major cloud players, including Amazon Lambda, Azure Functions, and Google Cloud Functions. Several significant online companies have implemented parts of their service on serverless platforms, notably the news site The Guardian.\footnote{https://aws.amazon.com/solutions/case-studies/the-guardian/}. The typical implementation of a serverless computing platform places user-submitted functions onto dynamically created Virtual Machines.\footnote{Cite Peeking Behind the Curtain?} These instances can be kept alive for a certain period of time after a function completes and reused if another call is received. Functions from different users are usually not placed in the same VM for security and isolation reasons, but one VM could host several instances of one user's function.
 
 \Paragraph{The Problem with Serverless: Coldstart}
-Starting VMs is slow guys.
+A central promise of serverless computing services such as Amazon Lambda is rapid scalability. Meeting this demand at scale requires that new function instances can be started very quickly to service incoming requests. This is easy when there are currently running, or warm, instances, but more difficult when a new, cold, instance must be started. A major bottleneck in achieving lower latency is the cold start time of new Virtual Machines. To start a new VM, first a machine with free resources must be chosen, then the host kernel must initialize virtual CPUs and other devices, then the guest kernel and file system must be loaded from disk and initialized in guest memory, before the VM can finally be executed.
 
 \Paragraph{Flash Cloning}
-What if we just copied a booted image rather than doing all that work?
+One of the most significant parts of the boot cycle of a VM is copying its kernel and file system into memory. Optimizing this step could dramatically reduce the startup latency of new serverless functions. Instead of loading VM images from disk, we propose cloning existing VMs in memory. Additionally, we add a copy-on-write mechanic to reduce both the copy time overhead and the memory pressure of packing many VMs onto one host. This method can be compared to the Unix fork abstraction.
 
 
 \begin{quote}
