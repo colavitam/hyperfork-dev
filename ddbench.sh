@@ -11,7 +11,8 @@ function signal_host {
     echo $1
 }
 
-dd if=/dev/urandom of=$FILE bs=$BS count=COUNT
+dd if=/dev/urandom of=$FILE bs=$BS count=$COUNT
 signal_host "allocated file"
-dd if=/dev/urandom of=$FILE bs=$BS count=COUNT
+dd if=/dev/urandom of=$FILE bs=$BS count=$COUNT
 signal_host "done"
+rm $FILE
