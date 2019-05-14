@@ -1,18 +1,16 @@
 #!/bin/busybox sh
 
 # Simple dd RAM benchmark:
-# write some memory (using tmpfs) and then write over it again
+# write some memory (using tmpfs), signal to host to fork,
+# and then write over it again
 
-FILE=/tmp/ddbench.bin
+SOURCE=/dev/urandom
+FILE=/dev/shm/ddbench.bin
 BS=1M
 COUNT=1000
 
-function signal_host {
-    echo $1
-}
-
 dd if=/dev/urandom of=$FILE bs=$BS count=$COUNT
-signal_host "allocated file"
+/bin/fork
 dd if=/dev/urandom of=$FILE bs=$BS count=$COUNT
-signal_host "done"
+/bin/done
 rm $FILE
