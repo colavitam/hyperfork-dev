@@ -1,0 +1,30 @@
+* Benchmarks
+Investigate different fork points:
+- right after boot
+- right after interpreter
+- right after package load
+
+Also look at total RAM usage (on host side)
+*** Measure
+- wall clock and cpu time to completion
+- cumulative level and at individual process level
+Get cpu time for a process started normally and a process started by fork
+** Python real world test
+For some parallelism at n, benchmark starting n machines from scratch and with fork
+- start python interpreter
+- image resize / cpu/mem benchmark
+** Memory Benchmark (cow)
+Populate mem with crap, fork, populate with new crap
+- Boot
+- mount tmpfs
+- dd random into tmp file
+- fork
+- dd over file
+** CPU Benchmark
+Clearcut test for when cow is not an issue
+Test total cpu time
+- some linalg routine
+** Pure Fork Microbenchmark
+- fork time vs allocated RAM
+- do this in the middle of the dd benchmark?
+** (Future) Hyperfork vs Firecracker (Firecracker is BS)
