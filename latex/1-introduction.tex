@@ -1,25 +1,82 @@
-% !TEX root = top.tex
-% above command is so that compilation is always from top.tex
+% !TEX root = top.tex above command is so that compilation is always from
+% top.tex
 \section{Introduction \& Motivation} \label{sec:intro}
-\Paragraph{Serverless Computing}
-Serverless computing, also known as Functions-as-a-Service, has become an increasingly important and desirable platform in the cloud ecosystem. Options are available from all of the major cloud players, including Amazon Lambda, Azure Functions, and Google Cloud Functions. Several significant online companies have implemented parts of their service on serverless platforms, notably the news site The Guardian.\footnote{https://aws.amazon.com/solutions/case-studies/the-guardian/}. The typical implementation of a serverless computing platform places user-submitted functions onto dynamically created Virtual Machines.\footnote{Cite Peeking Behind the Curtain?} These instances can be kept alive for a certain period of time after a function completes and reused if another call is received. Functions from different users are usually not placed in the same VM for security and isolation reasons, but one VM could host several instances of one user's function.
+\Paragraph{Serverless Computing} Serverless computing, also known as
+\emph{Functions-as-a-Service} (FaaS), has become an increasingly important and
+desirable platform in the cloud ecosystem. Stemming from the grand vision of
+computation as a utility, serverless computing offers users the ability to run
+application code directly on a black-box infrastructure. In comparison to
+current cloud computing platforms, serverless users (1) no longer have to
+manage virtual machine environments, (2) are billed only for application
+computation performed in response to requests, and (3) function instances are
+auto-scaled to handle dynamically changing request rates. Options are available
+from all of the major cloud players, including Amazon Lambda, Azure Functions,
+and Google Cloud Functions. Several significant online companies have
+implemented parts of their services on serverless platforms, notably the news
+site The
+Guardian.\footnote{https://aws.amazon.com/solutions/case-studies/the-guardian/}.
 
-\Paragraph{The Problem with Serverless: Coldstart}
-A central promise of serverless computing services such as Amazon Lambda is rapid scalability. Meeting this demand at scale requires that new function instances can be started very quickly to service incoming requests. This is easy when there are currently running, or warm, instances, but more difficult when a new, cold, instance must be started. A major bottleneck in achieving lower latency is the cold start time of new Virtual Machines. To start a new VM, first a machine with free resources must be chosen, then the host kernel must initialize virtual CPUs and other devices, then the guest kernel and file system must be loaded from disk and initialized in guest memory, before the VM can finally be executed.
+\Paragraph{Serverless Infrastructure} The typical implementation of a
+serverless computing platform places user-submitted functions onto dynamically
+created Virtual Machines (VMs). These functions are intended to be light-weight
+stateless single-process programs. Because of the relatively short run-times of
+serverless functions, a critical performance constraint in serverless
+infrastructure implementations is the scheduling latency of functions -- mainly
+comprising of the creation time for instance VMs. A standard optimization
+employed for this start-up time is to keep instance VMs running for a period of
+time, and schedule function requests onto existing VMs. This leads to a number
+of other properties, including limits on function run-time and the potential
+for functions to be terminated at any time. This is necessary for the scheduler
+to auto-scale instances efficiently. Another property is the clear split in
+individual function start-up latencies between \emph{warm-starts}, where a function
+is scheduled to an already running instance, and \emph{cold-starts}, where a new VM
+must be created for the function. Functions from different users are usually
+not placed in the same VM for security and isolation reasons, but one VM can
+host several instances of one user's function.
 
-\Paragraph{Flash Cloning}
-One of the most significant parts of the boot cycle of a VM is copying its kernel and file system into memory. Optimizing this step could dramatically reduce the startup latency of new serverless functions. Instead of loading VM images from disk, we propose cloning existing VMs in memory. Additionally, we add a copy-on-write mechanic to reduce both the copy time overhead and the memory pressure of packing many VMs onto one host. This method can be compared to the Unix fork abstraction.
+\Paragraph{The Problem with Serverless: Coldstart} A central promise of
+serverless computing services is rapid scalability. Meeting this demand at
+scale requires that new function instances can be started very quickly to
+service incoming requests. This is easy when there exist currently running
+\emph{warm} instances but more difficult when a new \emph{cold} instance must
+be started. The major bottleneck in achieving low latency instance start-up and
+fast auto-scaling is the cold-start latency. For cold-start, the major
+bottleneck is the creation of a new VM. After scheduling and provisioning, when
+a VM is created the host Hypervisor/Virtual Machine Monitor (VMM) must
+initialize virtual resources including CPUs, memory, and other devices, then
+the guest kernel and file system must be loaded from disk and initialized in
+guest memory, then the guest kernel is booted, and finally the function
+runtime/process is started and the request is handled.\footnote{Cite Peeking
+Behind the Curtain? Or something to justify bottleneck description.}
+
+\Paragraph{Flash Cloning} The most significant parts of VM creation are (1)
+copying the kernel and file system into memory, (2) booting the guest kernel,
+and (3) loading potentially large libraries/runtimes. Management operations
+within the VMM are relatively cheap compared to the start-up within a guest and
+the copying of guest memory. Optimizing these steps could dramatically reduce
+the startup latency of new serverless functions. One technique to do this is to
+employ \emph{flash cloning}. Instead of loading VM images from disk and booting
+a kernel, we propose cloning existing reference VMs in memory. Additionally, we
+propose a copy-on-write mechanic to reduce both the copy time overhead and the
+memory pressure of packing many VMs onto one host. This method can be compared
+to the Unix fork abstraction.
 
 
-\begin{quote}
-Our idea is to just fork everything and hope it's faster.
+\begin{quote} To create an isolated virtual machine, rather than re-create the
+entire world, we should only re-create the necessarily distinct VMM components
+and clone identical guest memory and execution context from ready-to-go
+reference VMs.
 \end{quote}
 
-We present \emph{HyperFork} to solve all the worlds problems.
+From this insight we present \emph{HyperFork}, a KVM-based VM cloning
+implementation for the context of serverless computing.
 
-\Paragraph{Contributions}
-Our contributions are as follows:
-\begin{itemize}
-\item We contribute, I swear it!
-
+\Paragraph{Contributions} Our contributions are as follows: \begin{itemize}
+\item A KVM based virtual machine cloning implementation which outperforms
+standard VM creation latencies by up to AMAZING\%
+\item A thorough discussion of the trade-offs related to a number of potential
+implementations for VM creation in the context of serverless computing.
+\item A thorough analysis of the performance of Hyperfork for both VM creation
+latency as well as VM co-location density and performance degredation with
+respect to copy-on-write memory sharing.
 \end{itemize}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  8 APR 2019 16:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  15 MAY 2019 13:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -257,8 +257,7 @@ Package color Info: Redefining color fxnote on input line 43.
 Package color Info: Redefining color fxwarning on input line 44.
 Package color Info: Redefining color fxerror on input line 45.
 Package color Info: Redefining color fxfatal on input line 46.
-)))
-No file top.aux.
+))) (./top.aux)
 \openout1 = `top.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 50.
@@ -273,6 +272,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 50.
 LaTeX Font Info:    ... okay on input line 50.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 50.
 LaTeX Font Info:    ... okay on input line 50.
+
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count116
@@ -359,55 +359,55 @@ LaTeX Font Info:    Try loading font information for T1+ptm on input line 53.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
-(./0-abstract.tex) (./1-introduction.tex) (./3-design.tex) (./4-experiments.tex
-) (./5-related.tex) (./6-conclusions.tex) (./7-acknowledgments.tex)
+(./0-abstract.tex) (./1-introduction.tex
+Underfull \hbox (badness 10000) in paragraph at lines 17--17
+[][]\T1/aer/m/n/9 https://aws.amazon.com/solutions/case-studies/the-
+ []
+
+[1{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+
+
+])
+(./3-design.tex) (./4-experiments.tex) (./5-related.tex) (./6-conclusions.tex)
+(./7-acknowledgments.tex)
 Overfull \hbox (2.93256pt too wide) in paragraph at lines 4--74
 []\T1/aer/m/n/9 This is the ac-knowl-edg-ments sec-tion  []Note: De-cide whethe
 r|
  []
 
-(./biblio.tex
-No file top.bbl.
-) (./Appendix.tex)
-No file top.lox.
+(./biblio.tex (./top.bbl)) (./Appendix.tex) (./top.lox)
 \tf@lox=\write4
 \openout4 = `top.lox'.
+
 
 
 Package balance Warning: You have called \balance in second column
 (balance)                Columns might not be balanced.
 
-[1{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
-
-
-]
-(./top.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+[2] (./top.aux) ) 
 Here is how much of TeX's memory you used:
- 3837 strings out of 492649
- 51999 string characters out of 6129622
- 130294 words of memory out of 5000000
- 7558 multiletter control sequences out of 15000+600000
- 53836 words of font info for 76 fonts, out of 8000000 for 9000
+ 3848 strings out of 492649
+ 52091 string characters out of 6129622
+ 132334 words of memory out of 5000000
+ 7560 multiletter control sequences out of 15000+600000
+ 55989 words of font info for 79 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  43i,10n,65p,288b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
-exlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/tex
-live/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texliv
-e/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2
-018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/201
-8/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2018/
-texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2018/texmf-d
-ist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2018/texmf-dist/fon
-ts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/u
-rw/times/utmr8a.pfb>
-Output written on top.pdf (1 page, 100307 bytes).
+{/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/base/8r.en
+c}</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb>
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/
+local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/loc
+al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local
+/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/t
+exlive/2018/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/
+2018/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2018/te
+xmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2018/texmf-dist/f
+onts/type1/urw/times/utmr8a.pfb>
+Output written on top.pdf (2 pages, 121030 bytes).
 PDF statistics:
- 45 PDF objects out of 1000 (max. 8388607)
- 32 compressed objects within 1 object stream
+ 52 PDF objects out of 1000 (max. 8388607)
+ 37 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
