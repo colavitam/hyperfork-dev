@@ -3,24 +3,48 @@
 \section{Related Work or Background} \label{sec:related}
 Our work in this paper draws concepts from several lines of past research.
 
-\Paragraph{Virtualization Technology} A description of Paravirtualization
-(Xen), Binary Translation (Old VMWare), Virtualization Hardware, KVM and QEMU. Keep
-it brief and focus on aspects related to current KVM and our Hyperfork
-implementation, such as copy-on-write and virtualized hardware extensions. This
-is at least 4 or 5 citations.
+\Paragraph{Virtualization Technology} Machine virtualization technology is
+a complex and diverse space. Classical Hypervisors/Virtual Machine Monitors
+(VMMs) relied on the fundamental primitive of \emph{Trap-and-Emulate}, where
+sensitive instructions in the guest would be traped by the hardware, and
+emulated safely within the VMM using shadow structures for privaleged
+state~\cite{classic-virt}. In x86 however, not all sensitive instructions are
+privaleged, meaning they can be trapped, and other techniques must also be used
+to enable virtualization. \emph{Full virtualization} of unmodified guest
+kernels was enabled through binary translation, where all sensitive
+instructions could be translated into privaleged instructions.
+\emph{Paravirtualization} used modifications to the guest operating systems to
+ensure sensitive operations were trapped. Today, modern hardware architectures
+include special virtualization instructions which remove the need for binary
+translation, and additionally remove the need for performance critical shadow
+structures using two-dimensional hardware page tables~\cite{virt-techniques}.
+Current virtualization technologies offer a mix of all these techniques,
+including binary translation for full nested virtualization using Oracle's
+HVX~\cite{hvx}, paravirtualization with Xen~\cite{xen}, and classic
+trap-and-emulate utilizing modern hardware extensions and the QEMU x86
+emulator~\cite{qemu} within the Linux kernel with KVM~\cite{kvm}. Xen is highly
+used within the research community because of its relatively simple
+software-only techniques, and KVM is valued for its tight integration with the
+Linux kernel.
 
-\Paragraph{Serverless Computing} A description of the general goals of
-serverless computing, the various aspects to serverless research, and the
-current state of the art industrial offerings. Include things like berkley
-serverless stuff, peeking behind curtain, formal models of computation,
-Firecracker, and a bunch of AWS/Microsoft/IBM citations for offerings. Again,
-brief text, relating mostly to the importance of serverless and interest of
-research community. Basically just cite the class reading list.
+\Paragraph{Serverless Computing} Serverless computing has become an
+increasingly important and desireable platform in the cloud ecosystem. Stemming
+from the grand vision of computation as a utility, serverless computing offers
+users the ability to run application code directly on a black-box
+infrastructure. Serverless has the potential to offer an easy to program,
+auto-scaling, cost efficient way to utilize cloud infrastructure for users,
+without the need to manage machine provisioning and configuration or service
+orchestration~\cite{berkeley-serverless}. Although there exist many popular
+industry serverless computing platforms
+today~\cite{lambda}\cite{gcf}\cite{azure-cf}\cite{openwhisk}, serverless is
+still an active area of research, with many improvements to be
+made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
-\Paragraph{Flash Cloning / Coldstart reduction efforts}
+\Paragraph{Flash Cloning / MicroVMs / Coldstart reduction efforts}
 Include Potemkin and Snowflock, as well as that short one about caching python
-modules.
+modules. Also maybe include unikernels/Denali/Firecracker.
+~\cite{potemkin}\cite{snowflock}\cite{unikernels}\cite{denali}\cite{firecracker}
 
 \Paragraph{VM Live Migration}
 Cite some state-of-the-art research / survey, maybe some tools/implementations.
-Focus text on explaining difference from flash cloning.
+Focus text on explaining difference from flash cloning.~\cite{post-copy-migration}

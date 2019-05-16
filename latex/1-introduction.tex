@@ -39,15 +39,14 @@ serverless computing services is rapid scalability. Meeting this demand at
 scale requires that new function instances can be started very quickly to
 service incoming requests. This is easy when there exist currently running
 \emph{warm} instances but more difficult when a new \emph{cold} instance must
-be started. The major bottleneck in achieving low latency instance start-up and
-fast auto-scaling is the cold-start latency. For cold-start, the major
-bottleneck is the creation of a new VM. After scheduling and provisioning, when
-a VM is created the host Hypervisor/Virtual Machine Monitor (VMM) must
-initialize virtual resources including CPUs, memory, and other devices, then
-the guest kernel and file system must be loaded from disk and initialized in
-guest memory, then the guest kernel is booted, and finally the function
-runtime/process is started and the request is handled.\footnote{Cite Peeking
-Behind the Curtain? Or something to justify bottleneck description.}
+be started. A major bottleneck in achieving low latency instance start-up and
+fast auto-scaling is the cold-start latency~\cite{peeking}. For cold-start, the
+major bottleneck is the creation of a new VM. After scheduling and
+provisioning, when a VM is created the host Hypervisor/Virtual Machine Monitor
+(VMM) must initialize virtual resources including CPUs, memory, and other
+devices, then the guest kernel and file system must be loaded from disk and
+initialized in guest memory, then the guest kernel is booted, and finally the
+function runtime/process is started and the request is handled.
 
 \Paragraph{Flash Cloning} The most significant parts of VM creation are (1)
 copying the kernel and file system into memory, (2) booting the guest kernel,
