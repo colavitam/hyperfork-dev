@@ -9,7 +9,7 @@ a complex and diverse space. Classical Hypervisors/Virtual Machine Monitors
 sensitive instructions in the guest would be trapped by the hardware, and
 emulated safely within the VMM using shadow structures for privileged
 state~\cite{classic-virt}. In x86 however, not all sensitive instructions are
-privileged, meaning they can be trapped, and other techniques must also be used
+privaleged, meaning some cannot be trapped, and other techniques must also be used
 to enable virtualization. \emph{Full virtualization} of unmodified guest
 kernels was enabled through binary translation, where all sensitive
 instructions could be translated into privileged instructions.

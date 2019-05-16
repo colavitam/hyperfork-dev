@@ -6,3 +6,8 @@ build/staging
 
 !build/Makefile
 !build/S50bench
+
+*.aux
+*.bbl
+*.log
+*.lox
