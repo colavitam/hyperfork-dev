@@ -1,11 +1,122 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 
+\newcommand{\kvmtool}[0]{\texttt{kvmtool}}
+\newcommand{\virtio}[0]{\texttt{virtio}}
+
 \section{HyperFork Architecture} \label{sec:design}
 
-\subsection{Firecracker VMM}
+\subsection{KVM Overview}
 
-\subsection{Host KVM}
+TODO: KVM description
 
-\subsection{Guest Kernel Driver}
+\subsection{\kvmtool}
+
+\kvmtool{} is a userland VMM with the minimal functionality required to boot a
+functional linux kernel with very basic virtualization devices. These devices
+include \virtio{} block, network, filesystem, balloon, hardware random number
+generation, and console devices, along with a legacy 8250 serial device. (CITE:
+kvmtool) It is provided as an alternative to heavier VMM solutions such as
+\texttt{qemu}, which supports a wide range of legacy devices and guest
+configurations.
+
+We selected \kvmtool{} as our userland VMM as it offers a very similar set of
+functionality to Firecracker, the VMM used to power Amazon Lambda. (TODO:
+contrast firecracker and kvmtool) However, we found that Firecracker was more
+difficult to work with due to its Rust codebase and containerization schemes.
+\kvmtool{} provides a minimal platform on which to test HyperFork when applied
+to Linux guests and closely approximates the VMM of a serverless platform.
+
+To virtualize efficiently, \kvmtool{} makes use of a large number of threads for
+managing vCPUs and emulated devices. When the virtual machine is started,
+\kvmtool{} creates a thread for each class of device, including the terminal,
+8250 serial console, block devices, and \virtio{} devices. It then creates
+several worker threads to handle arbitrary jobs that may arise from the
+\virtio{} devices. These tasks include processing work items from \virtio{}
+queues and updating the console. In its default configuration, \kvmtool{}
+allocates one worker thread for each CPU on the host machine. As we are
+virtualizing machines that are much smaller than the host machine, we limited
+\kvmtool{} to one worker thread per VM.
+
+In addition to device threads, \kvmtool{} also creates a thread to manage the
+virtual machines through IPC calls. This allows administrators to start, pause,
+stop, and debug virtual machines using a simple command line interface. Finally,
+\kvmtool{} creates one thread per vCPU that proceeds in a loop, invoking the
+\texttt{KVM\_RUN} ioctl, then handling any IO requests or interrupts that may
+arise. Together, this large set of threads enable efficient virtualization of
+the guest and its devices.
+
+\subsubsection{HyperFork in \kvmtool{}}
+
+Our userland HyperFork implementation for \kvmtool{} proceeds in a series of
+phases. First, the fork is triggered, either by an administrator invoking the
+\texttt{FORK} IPC via the command line interface, or by the guest sending a
+signal to the host indicating that it is ready to fork. In either case, the IPC
+thread receives this signal, pauses the virtual machine, and calls the pre-fork
+routines.
+
+Because KVM state becomes inaccessible in the child process after the VMM has
+forked, all state that must be restored in the child needs to be recorded by the
+parent before forking. Alternatively, this could be implemented by IPC between
+the parent and child, in which the state is sent after the fork is complete. We
+have adopted the former approach. The pre-fork routine thus performs the
+following:
+
+\begin{enumerate}
+\item Saves individual vCPU state, for each vCPU (registers, interrupt configuration, etc.)
+\item Saves global vCPU state (interrupt configuration, clock)
+\item Locks all mutexes that must survive in the guest
+\end{enumerate}
+
+Note that it is not necessary for the pre-fork routine to save the memory of the
+virtual machine. As the memory is mapped in the VMM process, it is unaffected by
+the fork system call and remains accessible. It will, however, need to be
+remapped in the guest following the fork.
+
+Once the pre-fork routine is complete, \kvmtool{} performs a fork. In the
+parent, all of the locks acquired by the pre-fork routines are released and
+execution proceeds. In the child, the post-fork routine is invoked, performing
+the following:
+
+\begin{enumerate}
+\item Acquires new file descriptors for the KVM device and virtual machine
+\item Creates new file descriptors for the vCPUs
+\item Restores individual and global vCPU state\footnote{In the process of
+restoring this state, we encountered a bug in how KVM handles setting the
+control registers when they change whether the guest is in long mode. We intend
+to investigate this further and report it if necessary.}
+\item Replaces all eventfds used for signalling
+\item Creates new threads to handle devices and the execution of each vCPU
+\item Releases all mutexes locked in the pre-fork routine, and replaces all
+condition variables\footnote{Condition variables must be replaced, as in many
+pthread implementations they contain an internal mutex that cannot be locked in
+the pre-fork routine. If this mutex is locked by another thread when the IPC
+thread performs the fork, the mutex will be permanently locked in the child
+process.}
+\item Attaches the terminal device to a new pseudo-terminal, or detaches it to
+accept no further input\footnote{Due to a bug in \kvmtool{}, operating with a
+pseudoterminal with no slave is not supported.}
+\end{enumerate}
+
+One the post-fork routine is complete, the vCPUs begin executing in the child
+and the fork is complete.
+
+\subsection{Guest-to-Host Signalling}
+
+For guests with more complex forking behavior, the guest may need to inform the
+host when it is ready to fork. For example, a virtual machine running a python
+program may chose to fork on boot, after python has started, after modules are
+loaded, or after further program initialization has completed. As the guest's
+userland state is very difficult to detect from the VMM, we implement a
+rudimentary system for guest-to-host signalling.
+
+The guest-to-host signal consists of sending a message over one of the
+processor's ports. This allows for a simple and very efficient way to send short
+messages to the host, without requiring any modifications to the guest kernel.
+This functionality is accessible from userland through the \texttt{outb}
+functions in the C standard library (CITE: outb, linux man). We define one
+message to indicate that the guest is ready to fork, and one message to indicate
+that the guest has completed its task. For benchmarking, we include a
+\texttt{fork} and \texttt{done} executable that signal the two events. Further
+messages could easily be defined for a more complex deployment.
 
