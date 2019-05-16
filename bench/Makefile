@@ -15,7 +15,13 @@ rambench: rambench.o comm.o
 %.o: %.c *.h
 	$(CC) $(CFLAGS) -c $<
 
+staging: rambench
+	mkdir staging
+	cp rambench S50bench staging
+	cd staging; pip download opencv-python
+
 clean:
 	rm -f *.o fork done rambench
+	rm -rf staging
 
 .PHONY: clean
