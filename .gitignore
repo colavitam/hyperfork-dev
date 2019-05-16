@@ -1,0 +1,8 @@
+*
+!*.*
+*.o
+*~
+build/staging
+
+!build/Makefile
+!build/S50bench
