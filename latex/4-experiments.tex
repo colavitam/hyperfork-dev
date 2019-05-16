@@ -19,7 +19,9 @@ For the experimental platform we do
 not want to use exactly the same phrasing in every paper, however, the content should
 be the same.
 
-We perform all tests on [SOME MACHINE], with [SOME SPECS].
+We perform all tests on [SOME MACHINE], with [SOME SPECS]. The file system image used for all tests is a minimal Linux setup generated using the buildroot utility.\footnote{buildroot.org} This specially generated image is not any particular distribution, but contains only the bare minimum of utilities and software needed for our benchmarks. In typical use, the guest images used for FaaS platforms may be more fleshed-out, but such single purpose images have no need for many of the qualities of a more feature-rich distribution. Since FaaS uses very short-lived instances, there is no need for package managers, update utilities, or other maintenance software.
+
+Using a minimal image also presents cold-boot times in the best possible environment, as a heavier image would take longer to boot. We therefore show that our implementation offers substantial start time improvements over even the best case scenario of cold-booting.
 
 \subsection{Benchmarks}
 
