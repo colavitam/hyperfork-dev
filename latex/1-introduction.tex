@@ -34,11 +34,11 @@ must be created for the function. Functions from different users are usually
 not placed in the same VM for security and isolation reasons, but one VM can
 host several instances of one user's function.
 
-\Paragraph{The Problem with Serverless: Coldstart} A central promise of
+\Paragraph{The Problem with Serverless: Cold-start} A central promise of
 serverless computing services is rapid scalability. Meeting this demand at
 scale requires that new function instances can be started very quickly to
 service incoming requests. This is easy when there exist currently running
-\emph{warm} instances but more difficult when a new \emph{cold} instance must
+warm instances but more difficult when a new cold instance must
 be started. A major bottleneck in achieving low latency instance start-up and
 fast auto-scaling is the cold-start latency~\cite{peeking}. For cold-start, the
 major bottleneck is the creation of a new VM. After scheduling and
@@ -79,3 +79,6 @@ implementations for VM creation in the context of serverless computing.
 latency as well as VM co-location density and performance degredation with
 respect to copy-on-write memory sharing.
 \end{itemize}
+
+The rest of the paper is organized as follows. Section whatever presents BLAH
+BLAH BLAH.

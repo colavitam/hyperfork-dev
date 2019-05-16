@@ -1,18 +1,18 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 \section{Related Work or Background} \label{sec:related}
-Our work in this paper draws concepts from several lines of past research.
+Our work in this paper draws on concepts from several lines of past research.
 
 \Paragraph{Virtualization Technology} Machine virtualization technology is
 a complex and diverse space. Classical Hypervisors/Virtual Machine Monitors
 (VMMs) relied on the fundamental primitive of \emph{Trap-and-Emulate}, where
-sensitive instructions in the guest would be traped by the hardware, and
-emulated safely within the VMM using shadow structures for privaleged
+sensitive instructions in the guest would be trapped by the hardware, and
+emulated safely within the VMM using shadow structures for privileged
 state~\cite{classic-virt}. In x86 however, not all sensitive instructions are
-privaleged, meaning they can be trapped, and other techniques must also be used
+privileged, meaning they can be trapped, and other techniques must also be used
 to enable virtualization. \emph{Full virtualization} of unmodified guest
 kernels was enabled through binary translation, where all sensitive
-instructions could be translated into privaleged instructions.
+instructions could be translated into privileged instructions.
 \emph{Paravirtualization} used modifications to the guest operating systems to
 ensure sensitive operations were trapped. Today, modern hardware architectures
 include special virtualization instructions which remove the need for binary
@@ -28,7 +28,7 @@ software-only techniques, and KVM is valued for its tight integration with the
 Linux kernel.
 
 \Paragraph{Serverless Computing} Serverless computing has become an
-increasingly important and desireable platform in the cloud ecosystem. Stemming
+increasingly important and desirable platform in the cloud ecosystem. Stemming
 from the grand vision of computation as a utility, serverless computing offers
 users the ability to run application code directly on a black-box
 infrastructure. Serverless has the potential to offer an easy to program,
@@ -40,11 +40,40 @@ today~\cite{lambda}\cite{gcf}\cite{azure-cf}\cite{openwhisk}, serverless is
 still an active area of research, with many improvements to be
 made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
-\Paragraph{Flash Cloning / MicroVMs / Coldstart reduction efforts}
-Include Potemkin and Snowflock, as well as that short one about caching python
-modules. Also maybe include unikernels/Denali/Firecracker.
-~\cite{potemkin}\cite{snowflock}\cite{unikernels}\cite{denali}\cite{firecracker}
+\Paragraph{Cold-start Reduction Efforts} There exists a number of different
+techniques which have been proposed in order to reduce cold-start
+latencies. One broad technique is to reduce the size and complexity of VMs
+which are used for serverless functions. Because serverless functions running
+in a cloud infrastructure run on a fairly limited and standard set of physical
+machines, the number of specialized drivers and kernel modules required to
+support this hardware is vastly smaller than that in a standard distribution.
+Additionally, because the function will only need to run a single process, a
+number of other optimizations can be made to reduce kernel size and boot time.
+These kinds of operating system optimizations have been explored previously
+with Unikernels~\cite{unikernels}, the Denali OS~\cite{denali}, and are
+represented in Amazon's custom $\mu$-Kernel and their serverless KVM VMM
+Firecracker~\cite{firecracker}.
 
-\Paragraph{VM Live Migration}
-Cite some state-of-the-art research / survey, maybe some tools/implementations.
-Focus text on explaining difference from flash cloning.~\cite{post-copy-migration}
+Another technique for reducing VM creation latencies involves the process of
+\emph{flash-cloning}, in which new VMs are cloned from existing reference VMs.
+This is an analogous process to forking processes within linux. One work which
+had success with this technique was the Potemkin Virtual
+Honeyfarm~\cite{potemkin}. Lightweight VMs were created as Honeypots for
+catching security vulnerabilities in cloud applications. This work successfully
+implements flash-cloning within the Xen hypervisor~\cite{xen} along with
+copy-on-write memory sharing, but focuses on VM density rather than start-up
+latency. We implement flash-cloning within a KVM based infrastructure to more
+closely match with industry standard serverless infrastructure, Amazon
+Firecracker~\cite{firecracker}, and with the goals of minimizing start-up
+latency and utilizing native copy-on-write functionality within the Linux
+kernel.
+
+\Paragraph{VM Live Migration} Flash-cloning relates very closely to the more
+mature virtualization technology of VM live
+migration~\cite{post-copy-migration}\cite{snowflock}. Cloud infrastructure has
+long required the ability to efficiently migrate VMs across physical hosts. VM
+live migration in general contains a superset of the functionality needed for
+flash-cloning, but is focused on efficiently supporting the migration of VM
+state across a slow network with minimal interruption to the VM. For serverless
+computing infrastructure, we are focused on extremely low latency and therefore
+do not want the complex techniques used for live-migration.
