@@ -1,11 +1,18 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 
-\section{HyperFork Implementation} \label{sec:design}
+\section{HyperFork Architecture} \label{sec:design}
 
-In this section we describe our HyperFork implementation, including background
-in KVM and kvmtool, as well as our design decisions regarding the flash-cloning
+In this section we describe our HyperFork architecture and implementation,
+including the overall platform architecture, the relevant implemetation details
+of KVM and kvmtool, as well as our design decisions regarding the flash-cloning
 operation.
+
+\subsection{Platform Architecture}
+
+Describe Xen vs KVM. kvmtool vs. Firecracker. Amazon Linux vs our small
+kernels. This is where many of our foundational design decisions should be
+justified. The following sections describe our implementation decisions.
 
 \subsection{KVM Overview}
 
