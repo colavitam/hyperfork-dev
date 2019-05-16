@@ -146,7 +146,7 @@ thread. In the child, this thread creates a new IPC handling thread and then
 assumes the role of the main kvmtool run thread, waiting on the guest vCPU0 to
 exit and then terminating the VM gracefully.
 
-\subsection{Guest-to-Host Signalling}
+\subsubsection{Guest-to-Host Signalling}
 
 For guests with more complex forking behavior, the guest may need to inform the
 host when it is ready to fork. For example, a virtual machine running a python
