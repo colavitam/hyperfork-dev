@@ -5,6 +5,6 @@ import subprocess
 
 subprocess.call(["root/fork"])
 
-numpy.runtests.main(["--bench", "bench_core"])
+numpy.core.test()
 
 subprocess.call(["root/done"])
