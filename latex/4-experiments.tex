@@ -64,7 +64,7 @@ Using a minimal image also presents cold-boot times in the best possible environ
 
 Even though memory is not copied to the child process unless it is written, it still takes time to walk through the parent page table and mark shared memory as read-only, and generate page tables for the child process. For this reason we expect to see fork times scale roughly linearly with the amount of memory allocated pre-fork. Allocating more memory simulates a VM with more programs and libraries loaded.
 
-\begin{figure}
+\begin{figure*}[t]
 
 \center
 
@@ -105,10 +105,10 @@ Even though memory is not copied to the child process unless it is written, it s
   y error minus = yesforklo,
   y error plus = yesforkhi
   ] {\cowtable};
-  \legend{First Pass, Second Pass}
+  \legend{Before fork, After fork}
 \end{axis}
 \end{tikzpicture}
-\hspace{0.5in}
+\hspace{0.75in}
 \begin{tikzpicture}[trim axis left]
 \begin{axis}[
   width=0.45\textwidth,
@@ -143,14 +143,13 @@ Even though memory is not copied to the child process unless it is written, it s
   y error minus = yesforklo,
   y error plus = yesforkhi
   ] {\memtable};
-  \legend{First Pass, Second Pass}
+  \legend{Before fork, After fork}
 \end{axis}
 \end{tikzpicture}
-
 \caption{Memory Benchmark with and without Copy-on-Write}
 \label{fig:rambench}
 
-\end{figure}
+\end{figure*}
 
 \Paragraph{Copy-on-Write Test} Though cloning VMs using Fork can decrease VM start times by orders of magnitude because of shared memory, performing Copy-on-Write on those shared regions has the potential to reduce performance. We implement a benchmark to isolate the performance degradation caused by Copy-on-Write operations after cloning.
 
