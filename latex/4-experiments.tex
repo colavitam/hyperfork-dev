@@ -7,17 +7,17 @@ First summarize the findings in an implicit way. For example:
 where Y, Z, K are our main contributions in the paper as well.
 
 \Paragraph{Experimental Setup}
-The experimental setup includes information about the following 5 things:
-(i) \textit{Experimental Platform}, i.e., the machine we used,
-(ii) \textit{Implementation}, i.e., whether it is a prototype system, based on an existing one, and any other relevant detail,
-(iii) \textit{Configuration}, i.e., the system-specific configuration and tuning that might have been needed, and discuss the possible values for any parameter.
-(iv) \textit{Workloads}, i.e., dataset characteristics, and query characteristics, and (unless the whole paper is a single experiment this here just gives a summary of the workloads used and each experiment later on gives the exact setup)
-(v) \textit{Metrics}, typically latency and/or throughput with some details and the
-methodology.
-
-For the experimental platform we do
-not want to use exactly the same phrasing in every paper, however, the content should
-be the same.
+%The experimental setup includes information about the following 5 things:
+%(i) \textit{Experimental Platform}, i.e., the machine we used,
+%(ii) \textit{Implementation}, i.e., whether it is a prototype system, based on an existing one, and any other relevant detail,
+%(iii) \textit{Configuration}, i.e., the system-specific configuration and tuning that might have been needed, and discuss the possible values for any parameter.
+%(iv) \textit{Workloads}, i.e., dataset characteristics, and query characteristics, and (unless the whole paper is a single experiment this here just gives a summary of the workloads used and each experiment later on gives the exact setup)
+%(v) \textit{Metrics}, typically latency and/or throughput with some details and the
+%methodology.
+%
+%For the experimental platform we do
+%not want to use exactly the same phrasing in every paper, however, the content should
+%be the same.
 
 We perform all tests on [SOME MACHINE], with [SOME SPECS]. The file system image used for all tests is a minimal Linux setup generated using the buildroot utility.\footnote{buildroot.org} This specially generated image is not any particular distribution, but contains only the bare minimum of utilities and software needed for our benchmarks. In typical use, the guest images used for FaaS platforms may be more fleshed-out, but such single purpose images have no need for many of the qualities of a more feature-rich distribution. Since FaaS uses very short-lived instances, there is no need for package managers, update utilities, or other maintenance software.
 
@@ -31,11 +31,15 @@ Even though memory is not copied to the child process unless it is written, it s
 
 \Paragraph{Copy-on-Write Test} Though cloning VMs using Fork can decrease VM start times by orders of magnitude because of shared memory, performing Copy-on-Write on those shared regions has the potential to reduce performance. We implement a benchmark to isolate the performance degradation caused by Copy-on-Write operations after cloning.
 
-This program begins by allocating many pages of memory, and writing a small amount of random data to each one. It then signals to the host, which forks the VM $n$ times. In each child the program then writes more random data to each of those pages.
+This program begins by allocating $p$ pages of memory, and writes $b$ bytes of random data to each one. It then signals to the host, which forks the VM $n$ times. In each child the program then writes more random data to each of those pages.
 
-\Paragraph{Real-world Conditions} In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code and data are copied on, and the user function is run. These services mostly use runtimes like NodeJS or Python. To simulate this sort of workload, we use pillow-perf, a Python image processing benchmark. We compare the total time of starting $n$ separate VMs, and letting each run the benchmark to completion, with the total time of forking $n$ VMs from one reference image and letting them run to completion. [TODO: fork at different times]
+Each of those post-fork writes will trap into the host kernel and induce a copy. We compare the average time to completion of child VMs to the time it takes a VM that has not forked to perform the same writes.
 
-The CPU performance of forked VMs should not differ from separately booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this assumption.
+\Paragraph{Real-world Conditions} In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code and data are copied on, and the user function is run. These services mostly use runtimes like NodeJS or Python. To simulate this sort of workload, we use pillow-perf, a Python image processing benchmark. This captures the typical scenario of a function which loads an interpreter, loads some external libraries, and performs some CPU-bound computation.
+
+We compare the total time of starting $n$ separate VMs, and letting each run the benchmark to completion, with the total time of forking $n$ VMs from one reference image and letting them run to completion. [TODO: fork at different times] The CPU performance of forked VMs should not differ from separately booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this assumption.
+
+\subsection{Results}
 
 \Paragraph{Explaining Each Figure}
 We first put the most important figures, i.e., the
