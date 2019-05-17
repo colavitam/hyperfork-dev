@@ -1,14 +1,11 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 
-\section{HyperFork Architecture} \label{sec:design}
+\section{Platform Architecture} \label{sec:design}
 
-In this section we describe our HyperFork architecture and implementation,
-including the overall platform architecture, the relevant implemetation details
-of KVM and kvmtool, as well as our design decisions regarding the flash-cloning
-operation.
+In this section we describe the platform HyperFork is build upon, including an overview of KVM and kvmtool.
 
-\subsection{Platform Architecture}
+
 
 Describe Xen vs KVM. kvmtool vs. Firecracker. Amazon Linux vs our small
 kernels. This is where many of our foundational design decisions should be
@@ -72,7 +69,11 @@ creates one thread per vCPU that proceeds in a loop, invoking the
 arise. Together, this set of threads, enable efficient virtualization of the
 guest and its devices.
 
-\subsection{HyperFork Implementation}
+\section{HyperFork Implementation}
+
+In this section we describe our HyperFork architecture and implementation
+and our design decisions regarding the flash-cloning
+operation.
 
 For our KVM based virtualization platform, flash-cloning requires duplicating a
 number of important components. We would like to make heavy use of the linux
@@ -146,14 +147,14 @@ thread. In the child, this thread creates a new IPC handling thread and then
 assumes the role of the main kvmtool run thread, waiting on the guest vCPU0 to
 exit and then terminating the VM gracefully.
 
-\subsubsection{Guest-to-Host Signalling}
+\subsubsection{Guest-to-Host Signaling}
 
 For guests with more complex forking behavior, the guest may need to inform the
 host when it is ready to fork. For example, a virtual machine running a python
 program may chose to fork on boot, after python has started, after modules are
 loaded, or after further program initialization has completed. As the guest's
 userspace state is very difficult to detect from the VMM, we implement a
-rudimentary system for guest-to-host signalling.
+rudimentary system for guest-to-host signaling.
 
 The guest-to-host signal consists of sending a message over one of the
 processor's ports. This allows for a simple and very efficient way to send
