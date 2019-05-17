@@ -64,7 +64,7 @@ Using a minimal image also presents cold-boot times in the best possible environ
 
 Even though memory is not copied to the child process unless it is written, it still takes time to walk through the parent page table and mark shared memory as read-only, and generate page tables for the child process. For this reason we expect to see fork times scale roughly linearly with the amount of memory allocated pre-fork. Allocating more memory simulates a VM with more programs and libraries loaded.
 
-\begin{figure*}
+\begin{figure}
 
 \center
 
@@ -105,10 +105,10 @@ Even though memory is not copied to the child process unless it is written, it s
   y error minus = yesforklo,
   y error plus = yesforkhi
   ] {\cowtable};
-  \legend{Without Fork, With Fork}
+  \legend{First Pass, Second Pass}
 \end{axis}
 \end{tikzpicture}
-\hspace{0.75in}
+\hspace{0.5in}
 \begin{tikzpicture}[trim axis left]
 \begin{axis}[
   width=0.45\textwidth,
@@ -143,11 +143,14 @@ Even though memory is not copied to the child process unless it is written, it s
   y error minus = yesforklo,
   y error plus = yesforkhi
   ] {\memtable};
-  \legend{Without Fork, With Fork}
+  \legend{First Pass, Second Pass}
 \end{axis}
 \end{tikzpicture}
 
-\end{figure*}
+\caption{Memory Benchmark with and without Copy-on-Write}
+\label{fig:rambench}
+
+\end{figure}
 
 \Paragraph{Copy-on-Write Test} Though cloning VMs using Fork can decrease VM start times by orders of magnitude because of shared memory, performing Copy-on-Write on those shared regions has the potential to reduce performance. We implement a benchmark to isolate the performance degradation caused by Copy-on-Write operations after cloning.
 
@@ -161,19 +164,23 @@ We compare the total time of starting $n$ separate VMs, and letting each run the
 
 \subsection{Results}
 
-\Paragraph{Explaining Each Figure}
-We first put the most important figures, i.e., the
-ones that have the most important results in terms
-of the contributions. Each figure should be a
-single message. Each figure comes with two
-paragraphs. One paragraph for the setup and one
-paragraph for the discussion. The set-up paragraph
-should start by saying ``In this experiment we
-show that... We setup this experiment as follows...''.
+\Paragraph{Fork Time}
 
-The result paragraph explains in detail why we see
-what we see. Explanations should be based on facts
-and logic. Numbers that back up the explanations
-should be provided whenever possible. The
-paragraph should finish by repeating the main
-message again.
+\Paragraph{Copy-on-Write} Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two graphs each show the stages of the benchmark: The blue columns show the time to write random data to each page of a large memory allocation. The red columns show the time to rewrite those pages. On the left, we fork between running these two stages, so any memory accesses in the second stage will require a page fault, copy, and resume. On the right we do not fork, so no page fault is required. This experiment shows approximately a 28\% performance penalty for memory accesses which trigger copy-on-write behavior.
+
+%\Paragraph{Explaining Each Figure}
+%We first put the most important figures, i.e., the
+%ones that have the most important results in terms
+%of the contributions. Each figure should be a
+%single message. Each figure comes with two
+%paragraphs. One paragraph for the setup and one
+%paragraph for the discussion. The set-up paragraph
+%should start by saying ``In this experiment we
+%show that... We setup this experiment as follows...''.
+%
+%The result paragraph explains in detail why we see
+%what we see. Explanations should be based on facts
+%and logic. Numbers that back up the explanations
+%should be provided whenever possible. The
+%paragraph should finish by repeating the main
+%message again.
