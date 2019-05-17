@@ -1,4 +1,13 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.texThis is the conclusions section
-\section{Summary} \label{sec:conclusions}
-In this paper we present \emph{HyperFork}, it's great guys. 
+\section{Conclusions} \label{sec:conclusions}
+In this paper we present \emph{HyperFork}, it's great guys.
+
+\subsection{Future Work}
+
+\begin{itemize}
+  \item Our HyperFork implementation currently does not handle many devices. A deployable HyperFork would need to re-initialize and re-configure network state post-fork. We also assume in our implementation that the guest is running entirely from a RAM filesystem. If any external virtual or physical disks were in use, then HyperFork would need to address synchronization concerns with those devices.
+  \item Our current HyperFork implementation operates entirely in userspace by serializing all KVM state pre-fork and then recreating it post-fork. We suspect that a kernel-mode implementation may offer further performance benefits. This avoids the overhead of copying KVM state into userpace and then back into the kernel, instead just passing the state directly between the KVM backing structures for the parent and child processes.
+  \item There are several serious security concerns with cloning Virtual Machines in production. ASLR and KASLR are defeated, since the guest memory is copied exactly. It is also not desirable for two guest VMs to share a source of randomness, so any random generators would need to be re-seeded in the child VM.
+  \item Firecracker boasts significant boot time improvements over existing hypervisor solutions. In our experiments we discovered that the configuration of the guest kernel can also affect boot times by an order of magnitude. We therefore would like to investigate whether Firecracker's performance improvements come from its inherent design and implementation or if it gains these benefits primarily by using stripped-down guest kernels and filesystem images.
+\end{itemize}
