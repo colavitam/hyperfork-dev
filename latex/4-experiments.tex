@@ -25,9 +25,124 @@ Using a minimal image also presents cold-boot times in the best possible environ
 
 \subsection{Benchmarks}
 
+\pgfplotstableread{forktime.tab}{\forktimetable}
+
+\begin{tikzpicture}
+\begin{axis}[
+    title={Time for Virtual Machine Fork},
+    xlabel={Guest Memory (MB)},
+    ylabel={Time (ms)},
+    xmin=0, xmax=2304,
+    ymin=0, ymax=24,
+    xtick={0, 512, 1024, 1536, 2048},
+    ytick={0, 4, 8, 12, 16, 20, 24},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    grid style=dashed,
+]
+ 
+\addplot+[
+    color=blue,
+    mark=square,
+    only marks,
+    error bars/.cd,
+    y dir=both, y explicit
+    ]
+    table [
+      y error minus = ly,
+      y error plus = hy
+    ] {\forktimetable};
+\end{axis}
+\end{tikzpicture}
+
 \Paragraph{Fork Time} We run several experiments to test the time for a VM to fork. These tests start a virtual machine, allocate some memory, and then fork. The forking process marks a timestamp when its fork() call returns, and the child marks a timestamp once it finishes restoring KVM state.
 
 Even though memory is not copied to the child process unless it is written, it still takes time to walk through the parent page table and mark shared memory as read-only, and generate page tables for the child process. For this reason we expect to see fork times scale roughly linearly with the amount of memory allocated pre-fork. Allocating more memory simulates a VM with more programs and libraries loaded. [FIGURE: fork time in parent and child vs amount of memory allocated pre-fork]
+
+\begin{figure*}
+
+\center
+
+\pgfplotstableread{pagefault.tab}{\cowtable}
+\pgfplotstableread{nopagefault.tab}{\memtable}
+
+\begin{tikzpicture}[trim axis left]
+\begin{axis}[
+  width=0.45\textwidth,
+  title={Time for Memory Pass, Page Fault Required},
+	xtick=data,
+  symbolic x coords={128,256,512,1024,1536},
+	ylabel={Time (ms)},
+  xlabel={Pages Touched (MB)},
+  legend style={at={(0.05,0.95)},anchor=north west},
+	ybar,
+	bar width=7pt,
+  ymajorgrids=true,
+  grid style=dashed
+]
+\addplot+[
+  error bars/.cd,
+  y dir=both, y explicit
+  ]
+  table [
+  x = mem,
+  y = nofork,
+  y error minus = noforklo,
+  y error plus = noforkhi
+  ] {\cowtable};
+\addplot+[
+  error bars/.cd,
+  y dir=both, y explicit
+  ]
+  table [
+  x = mem,
+  y = yesfork,
+  y error minus = yesforklo,
+  y error plus = yesforkhi
+  ] {\cowtable};
+  \legend{Without Fork, With Fork}
+\end{axis}
+\end{tikzpicture}
+\hspace{0.75in}
+\begin{tikzpicture}[trim axis left]
+\begin{axis}[
+  width=0.45\textwidth,
+  title={Time for Memory Pass, No Page Fault},
+	xtick=data,
+  symbolic x coords={128,256,512,1024,1536},
+	ylabel={Time (ms)},
+  xlabel={Pages Touched (MB)},
+  legend style={at={(0.05,0.95)},anchor=north west},
+	ybar,
+	bar width=7pt,
+  ymajorgrids=true,
+  grid style=dashed
+]
+\addplot+[
+  error bars/.cd,
+  y dir=both, y explicit
+  ]
+  table [
+  x = mem,
+  y = nofork,
+  y error minus = noforklo,
+  y error plus = noforkhi
+  ] {\memtable};
+\addplot+[
+  error bars/.cd,
+  y dir=both, y explicit
+  ]
+  table [
+  x = mem,
+  y = yesfork,
+  y error minus = yesforklo,
+  y error plus = yesforkhi
+  ] {\memtable};
+  \legend{Without Fork, With Fork}
+\end{axis}
+\end{tikzpicture}
+
+\end{figure*}
 
 \Paragraph{Copy-on-Write Test} Though cloning VMs using Fork can decrease VM start times by orders of magnitude because of shared memory, performing Copy-on-Write on those shared regions has the potential to reduce performance. We implement a benchmark to isolate the performance degradation caused by Copy-on-Write operations after cloning.
 
