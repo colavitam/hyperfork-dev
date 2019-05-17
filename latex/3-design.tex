@@ -114,7 +114,7 @@ memory is mapped in the VMM process, it is unaffected by the fork system call
 and remains accessible. It will, however, need to be remapped in the guest
 following the fork.
 
-Once the pre-fork routine is complete, kvmtool performs a fork. In the
+Once the pre-fork routine is complete, kvmtool calls Linux fork(). In the
 parent, all of the locks acquired by the pre-fork routines are released and
 execution proceeds. In the child, the post-fork routine is invoked, performing
 the following to reconstruct necessary VMM state:
@@ -165,4 +165,3 @@ evaluations, we include in the guest images a \texttt{fork} and \texttt{done}
 executable that signal the two events which can be easily executed by guest
 benchmarks. Further messages could easily be defined for a more complex
 deployment.
-
