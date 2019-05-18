@@ -1,27 +1,28 @@
-% !TEX root = top.tex
-% above command is so that compilation is always from top.tex
-\section{Experimental Evaluation} \label{sec:experiments}
-This is the experiments section
-First summarize the findings in an implicit way. For example:
-``In this section, we demonstrate that System X achieves Z, Y, K''
-where Y, Z, K are our main contributions in the paper as well.
+% !TEX root = top.tex above command is so that compilation is always from
+% top.tex
+\section{Experimental Evaluation} \label{sec:experiments} We now describe the
+design of our benchmarks for the kvmtool HyperFork implementation. We have
+conducted both microbenchmarks, to test the overhead of fork and copy-on-write
+page duplication, and end-to-end benchmarks to measure throughput and resource
+utilization improvements.
 
 \Paragraph{Experimental Setup}
-%The experimental setup includes information about the following 5 things:
-%(i) \textit{Experimental Platform}, i.e., the machine we used,
-%(ii) \textit{Implementation}, i.e., whether it is a prototype system, based on an existing one, and any other relevant detail,
-%(iii) \textit{Configuration}, i.e., the system-specific configuration and tuning that might have been needed, and discuss the possible values for any parameter.
-%(iv) \textit{Workloads}, i.e., dataset characteristics, and query characteristics, and (unless the whole paper is a single experiment this here just gives a summary of the workloads used and each experiment later on gives the exact setup)
-%(v) \textit{Metrics}, typically latency and/or throughput with some details and the
-%methodology.
-%
-%For the experimental platform we do
-%not want to use exactly the same phrasing in every paper, however, the content should
-%be the same.
 
-We perform all tests on [SOME MACHINE], with [SOME SPECS]. The file system image used for all tests is a minimal Linux setup generated using the buildroot utility.\footnote{buildroot.org} This specially generated image is not any particular distribution, but contains only the bare minimum of utilities and software needed for our benchmarks. In typical use, the guest images used for FaaS platforms may be more fleshed-out, but such single purpose images have no need for many of the qualities of a more feature-rich distribution. Since FaaS uses very short-lived instances, there is no need for package managers, update utilities, or other maintenance software.
+We perform all tests on an m5.metal instance from Amazon Web Services EC2,
+which features 96 logical processors and 384 GB of memory. The file system
+image used for all tests is a minimal Linux setup generated using the buildroot
+utility.\footnote{buildroot.org} This specially generated image contains only
+the minimal set of utilities and software needed for our benchmarks. In typical
+use, the guest images used for FaaS platforms may be more fully featured and
+optimized, but such single purpose images have no need for the flexibility of a
+general purpose Linux distribution image. Since FaaS uses very short-lived
+instances, there is no need for package managers, update utilities, or other
+maintenance software.
 
-Using a minimal image also presents cold-boot times in the best possible environment, as a heavier image would take longer to boot. We therefore show that our implementation offers substantial start time improvements over even the best case scenario of cold-booting.
+Using a minimal image also presents cold-boot times in the best possible
+environment, as a heavier image would take longer to boot. We therefore show
+that our implementation offers substantial start time improvements over even
+the best case scenario of cold-booting.
 
 \subsection{Benchmarks}
 
@@ -56,13 +57,60 @@ Using a minimal image also presents cold-boot times in the best possible environ
       ] {\forktimetable};
   \end{axis}
   \end{tikzpicture}
-  \caption{Time for Virtual Machine Fork}
+  \caption{Time for virtual machine fork ($n = 600$)}
   \label{fig:fork-time}
 \end{figure}
 
-\Paragraph{Fork Time} We run several experiments to test the time for a VM to fork. These tests start a virtual machine, allocate some memory, and then fork. The forking process marks a timestamp when its fork() call returns, and the child marks a timestamp once it finishes restoring KVM state. Figure~\ref{fig:fork-time} shows the fork time as recorded by the child VM for varying amounts of allocated guest memory.
+\begin{figure}[t]
 
-Even though memory is not copied to the child process unless it is written, it still takes time to walk through the parent page table and mark shared memory as read-only, and generate page tables for the child process. For this reason we expect to see fork times scale roughly linearly with the amount of memory allocated pre-fork. Allocating more memory simulates a VM with more programs and libraries loaded.
+  \pgfplotstableread{boottime.tab}{\boottimetable}
+
+  \begin{tikzpicture}
+  \begin{axis}[
+      title={Time for Virtual Machine Cold Start},
+      xlabel={Guest Memory (MB)},
+      ylabel={Time (ms)},
+      xmin=0, xmax=2304,
+      ymin=0, ymax=600,
+      xtick={0, 512, 1024, 1536, 2048},
+      ytick={0, 100, 200, 300, 400, 500, 600},
+      ymajorgrids=true,
+      xmajorgrids=true,
+      grid style=dashed,
+  ]
+
+  \addplot+[
+      color=blue,
+      mark=square,
+      only marks,
+      error bars/.cd,
+      y dir=both, y explicit
+      ]
+      table [
+        y error minus = ly,
+        y error plus = hy
+      ] {\boottimetable};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Time for virtual machine cold start ($n = 100$)}
+  \label{fig:boot-time}
+\end{figure}
+
+\Paragraph{Fork Time}
+
+We run several experiments to test the time for a VM to fork. These tests start
+a virtual machine, allocate some memory, and then fork.  The forking process
+marks a timestamp when its fork() call returns, and the child marks a timestamp
+once it finishes restoring KVM state.  Figure~\ref{fig:fork-time} shows the
+fork time as recorded by the child VM for varying amounts of allocated guest
+memory.
+
+Even though memory is not copied to the child process unless it is written, it
+still takes time to walk through the parent page table and mark shared memory
+as read-only, and generate page tables for the child process. For this reason
+we expect to see fork times scale roughly linearly with the amount of memory
+allocated pre-fork. Allocating more memory simulates a VM with more programs
+and libraries loaded.
 
 \begin{figure*}[t]
 
@@ -146,26 +194,58 @@ Even though memory is not copied to the child process unless it is written, it s
   \legend{Before fork, After fork}
 \end{axis}
 \end{tikzpicture}
-\caption{Memory Benchmark with and without Copy-on-Write}
+\caption{Memory benchmark with and without copy-on-write ($n=100$)}
 \label{fig:rambench}
 
 \end{figure*}
 
-\Paragraph{Copy-on-Write Test} Though cloning VMs using Fork can decrease VM start times by orders of magnitude because of shared memory, performing Copy-on-Write on those shared regions has the potential to reduce performance. We implement a benchmark to isolate the performance degradation caused by Copy-on-Write operations after cloning.
+\Paragraph{Copy-on-Write Test}
 
-This program begins by allocating $p$ pages of memory, and writes $b$ bytes of random data to each one. It then signals to the host, which forks the VM $n$ times. In each child the program then writes more random data to each of those pages.
+Though cloning VMs using Fork can decrease VM start times by orders of
+magnitude because of shared memory, performing Copy-on-Write on those shared
+regions has the potential to reduce performance. We implement a benchmark to
+isolate the performance degradation caused by Copy-on-Write operations after
+cloning.
 
-Each of those post-fork writes will trap into the host kernel and induce a copy. We compare the average time to completion of child VMs to the time it takes a VM that has not forked to perform the same writes.
+This program begins by allocating $p$ pages of memory, and writes $b$ bytes of
+random data to each one. It then signals to the host, which forks the VM $n$
+times. In each child the program then writes more random data to each of those
+pages.
 
-\Paragraph{Real-world Conditions} In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code and data are copied on, and the user function is run. These services mostly use runtimes like NodeJS or Python. To simulate this sort of workload, we use pillow-perf, a Python image processing benchmark. This captures the typical scenario of a function which loads an interpreter, loads some external libraries, and performs some CPU-bound computation.
+Each of those post-fork writes will trap into the host kernel and induce a
+copy. We compare the average time to completion of child VMs to the time it
+takes a VM that has not forked to perform the same writes.
 
-We compare the total time of starting $n$ separate VMs, and letting each run the benchmark to completion, with the total time of forking $n$ VMs from one reference image and letting them run to completion. [TODO: fork at different times] The CPU performance of forked VMs should not differ from separately booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this assumption.
+\Paragraph{Real-world Conditions}
+
+In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code
+and data are copied on, and the user function is run. These services mostly use
+runtimes like NodeJS or Python. To simulate this sort of workload, we use
+pillow-perf, a Python image processing benchmark. This captures the typical
+scenario of a function which loads an interpreter, loads some external
+libraries, and performs some CPU-bound computation.
+
+We compare the total time of starting $n$ separate VMs, and letting each run
+the benchmark to completion, with the total time of forking $n$ VMs from one
+reference image and letting them run to completion. [TODO: fork at different
+times] The CPU performance of forked VMs should not differ from separately
+booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this
+assumption.
 
 \subsection{Results}
 
 \Paragraph{Fork Time}
 
-\Paragraph{Copy-on-Write} Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two graphs each show the stages of the benchmark: The blue columns show the time to write random data to each page of a large memory allocation. The red columns show the time to rewrite those pages. On the left, we fork between running these two stages, so any memory accesses in the second stage will require a page fault, copy, and resume. On the right we do not fork, so no page fault is required. This experiment shows approximately a 28\% performance penalty for memory accesses which trigger copy-on-write behavior.
+\Paragraph{Copy-on-Write}
+
+Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two
+graphs each show the stages of the benchmark: The blue columns show the time to
+write random data to each page of a large memory allocation. The red columns
+show the time to rewrite those pages. On the left, we fork between running
+these two stages, so any memory accesses in the second stage will require a
+page fault, copy, and resume. On the right we do not fork, so no page fault is
+required. This experiment shows approximately a 28\% performance penalty for
+memory accesses which trigger copy-on-write behavior.
 
 %\Paragraph{Explaining Each Figure}
 %We first put the most important figures, i.e., the

@@ -16,10 +16,10 @@ justified. The following sections describe our implementation decisions.
 A full KVM system contains a number of major components within a Linux host
 machine, as depicted in Figure~\ref{fig:kvm-arch}. The KVM kernel module tracks
 and maintains most of the sensitive virtualized machine state. Each guest is
-isolated within a linux process, which contains both VMM management components
-as well as the running guest. Within the VMM, management components withing the
+isolated within a standard linux process, which contains both VMM management components
+as well as the running guest. Within the VMM, management components within the
 userspace guest processes communicate with the KVM kernel module via a set of
-IOCTLs. Outside of the guest processes, the VMM contains CLI based management
+ioctls. Outside of the guest processes, the VMM contains CLI based management
 utility programs for administrators which use IPCs to communicate with the
 guest process VMM components. For our implementation, the userspace VMM
 components are implemented in kvmtool, however these same fundamental
@@ -36,27 +36,27 @@ Firecracker~\cite{firecracker}.
 
 kvmtool~\cite{kvmtool} is a VMM implementation for KVM with the minimal
 functionality required to boot a fully functional linux kernel with very basic
-virtualization devices.  The supported devices include block, network,
-filesystem, balloon, hardware random number generation, and console virtual
-devices, along with a legacy 8250 serial device. kvmtool is provided as an
-alternative to heavier VMM solutions such as QEMU~\cite{qemu}, which supports a
-wide range of legacy devices and guest configurations.
+virtualized devices. Supported devices include block, network, filesystem,
+balloon, hardware random number generation, and console virtual devices, along
+with a legacy 8250 serial device. kvmtool is provided as an alternative to
+heavier VMM solutions such as QEMU~\cite{qemu}, which supports a wide range of
+legacy devices and guest configurations.
 
 We selected kvmtool as our userspace VMM as it offers a very similar set of
 functionality to Firecracker, the VMM used to power Amazon Lambda. (TODO:
-contrast firecracker and kvmtool) We chose kvmtool over Firecracker however
-because we found that Firecracker was more difficult to work with due to its
-Rust codebase and containerization schemes. kvmtool provides a minimal
-platform on which to test HyperFork when applied to Linux guests and closely
-approximates the VMM of an industrial serverless platform.
+contrast firecracker and kvmtool) We chose kvmtool over Firecracker because we
+found that Firecracker was more difficult to work with due to its Rust codebase
+and containerization schemes. kvmtool provides a minimal platform on which to
+test HyperFork applied to Linux guests and closely approximates the VMM of an
+industrial serverless platform.
 
 To virtualize efficiently, kvmtool makes use of a number of threads for
 managing vCPUs and emulated devices. Userspace bookkeeping data structures hold
-file descriptors which point to the sensitive VMM state maintained within the
-KVM kernel module. When the virtual machine is started, kvmtool creates a
-thread for each class of device, including the terminal, 8250 serial console,
-block devices, and other virtio devices. It then creates several worker threads
-to handle arbitrary jobs that may arise from the virtio devices. These tasks
+file descriptors which point to the internal VM state maintained within the KVM
+kernel module. When the virtual machine is started, kvmtool creates a thread
+for each class of device, including the terminal, 8250 serial console, block
+devices, and other virtio devices. It then creates several worker threads to
+handle arbitrary jobs that may arise from the virtio devices. These tasks
 include processing work items from virtio queues and updating the console. In
 its default configuration, kvmtool allocates one worker thread for each CPU on
 the host machine. As we are virtualizing machines that are much smaller than
@@ -66,35 +66,39 @@ through IPC calls. This allows administrators to start, pause, stop, and debug
 virtual machines using a simple command line interface. Finally, kvmtool
 creates one thread per vCPU that proceeds in a loop, invoking the
 \texttt{KVM\_RUN} ioctl, then handling any IO requests or interrupts that may
-arise. Together, this set of threads, enable efficient virtualization of the
+arise. Together, this set of threads enables efficient virtualization of the
 guest and its devices.
 
 \section{HyperFork Implementation}
 
-In this section we describe our HyperFork architecture and implementation
-and our design decisions regarding the flash-cloning
-operation.
+We now describe the architecture and implementation of Hyperfork, along with
+our design decisions regarding the flash-cloning operation.
 
-For our KVM based virtualization platform, flash-cloning requires duplicating a
-number of important components. We would like to make heavy use of the linux
-fork operation to duplicate guest memory with copy-on-write functionality, as
-well as duplicating much of the userspace VMM management state. Fork alone
-however still leaves kernelspace management state unduplicated, cannot
-duplicate all userspace VMM threads, and leaves userspace bookkeeping file
-descriptors pointing to parent kernelspace management state. Duplicating kernel
-state can either be performed within the kernel or entirely in userspace by
-extracting and saving guest specific state in userspace before forking. We
-predict a kernel implementation may have slightly higher performance, but for
-simplicity we implement our flash-cloning entirely in userspace within kvmtool.
-We also add an ad-hoc guest-to-host communication channel, which is not
-supported by default within kvmtool, to enable our experimental evaluations.
+For our KVM based virtualization platform, flash-cloning requires duplicating
+several pieces of VM state. Where possible, we aim to make heavy use of the
+linux fork operation to duplicate this state, as it is highly optimized and
+provides copy-on-write functionality for duplicated pages. Specifically, guest
+memory will be duplicated with copy-on-write functionality so that the backing
+pages are not copied for the child unless necessary. However, fork leaves
+kernelspace management state unduplicated, cannot duplicate all userspace VMM
+threads, and leaves userspace bookkeeping file descriptors pointing to the
+parent process's KVM management structures, which are inaccessible in the
+child. Duplicating kernel state can either be performed within the kernel, by
+coping in-kernel data structures, or in userspace by extracting and saving
+guest specific state in userspace before forking. We predict a kernel
+implementation may have slightly higher performance, but for simplicity we
+implement our flash-cloning entirely in userspace within kvmtool.\footnote{Note
+that a kernel implementation would also need to update file descriptors and
+their memory mappings. This creates quite a mess in practice.} We also add an
+ad-hoc guest-to-host communication channel with an extension to kvmtool to
+enable our experimental evaluations.
 
 \subsubsection{Flash-Cloning Support in kvmtool}
 
 Our userspace HyperFork implementation for kvmtool proceeds in a series of
-phases. The phases include a triggering event, pre-fork extraction and saving
-of kernel state, forking, and post-forking reconstruction of VMM management
-state in the child.
+phases. At a high level, these phases are a triggering event, pre-fork
+extraction and saving of kernel state, forking, and post-forking reconstruction
+of VMM management state in the child.
 
 First, the fork is triggered, either by an administrator invoking the
 \texttt{FORK} IPC via the command line interface, or by the guest sending a
@@ -115,8 +119,8 @@ memory is mapped in the VMM process, it is unaffected by the fork system call
 and remains accessible. It will, however, need to be remapped in the guest
 following the fork.
 
-Once the pre-fork routine is complete, kvmtool calls Linux fork(). In the
-parent, all of the locks acquired by the pre-fork routines are released and
+Once the pre-fork routine is complete, kvmtool calls the system call fork. In
+the parent, all of the locks acquired by the pre-fork routines are released and
 execution proceeds. In the child, the post-fork routine is invoked, performing
 the following to reconstruct necessary VMM state:
 
