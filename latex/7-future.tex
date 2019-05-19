@@ -1,14 +1,14 @@
 \section{Future Work} \label{sec:future}
 
-\Paragraph{Current Limitations} While our current HyperFork implementation provides a
-reliable fork primitive for our basic benchmarks, it has several limitations
-that would need to be addressed before production deployment. Currently, only
-read-only root filesystems are supported. Read-write filesystems can cause
-corruption when multiple forked virtual machines have contradictory state. We
-observed this several times in practice. This could be addressed by adding an
-overlay layer to the block device driver that stores writes to the file system
-in VMM memory instead of persisting them to disk, making writes from different
-virtual machines invisible to each other.
+\Paragraph{Current Limitations} While our current HyperFork implementation
+provides a reliable fork primitive for our basic benchmarks, it has several
+limitations that would need to be addressed before production deployment.
+Currently, only read-only root filesystems are supported. Read-write
+filesystems can cause corruption when multiple forked virtual machines have
+contradictory state. We observed this several times in practice. This could be
+addressed by adding an overlay layer to the block device driver that stores
+writes to the file system in VMM memory instead of persisting them to disk,
+making writes from different virtual machines invisible to each other.
 
 We have not added support for all of kvmtool's devices to Hyperfork.
 Specifically, the network device and virtio balloon device are not
@@ -16,9 +16,9 @@ supported. Additionally, kvmtool has an outstanding bug in its terminal
 emulation that manifests in degraded performance after forking. We have worked
 around this in our current implementation.
 
-Furthermore, there is an outstanding race condition in the kvm-clock feature, a
-paravirtualized clock accessible from the guest virtual machine. This manifests
-itself as occasional non-monotonicity in the guest, causing prolonged
+Additionally, there is an outstanding race condition in the kvm-clock feature,
+a paravirtualized clock accessible from the guest virtual machine. This
+manifests itself as occasional non-monotonicity in the guest, causing prolonged
 kernel-level stalls in the guest virtual machine. For our tests, we have
 disabled kvm-clock to avoid these problems. We suspect it can be resolved by
 careful adjustment of the clock when restoring virtual machine state.
