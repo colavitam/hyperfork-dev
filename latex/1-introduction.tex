@@ -67,15 +67,15 @@ memory pressure of packing many VMs onto one host. This method can be compared
 to the Unix fork abstraction.
 
 \Paragraph{HyperFork} To create a new, isolated virtual machine, we propose to
-re-create only the necessarily distinct VMM components while cloning initialized
-guest memory and execution context pre-booted virtual machines. From this
-insight we present \emph{HyperFork}, a KVM-based VM cloning implementation for
-serverless computing. We demonstrate that HyperFork outperforms standard VM
-creation latencies by up to two orders of magnitude. We further present a
-thorough analysis of the potential performance degradation due to copy-on-write
-memory sharing. We further demonstrate that latency-sensitive workloads display
-a marked improvement in overall resource utilization without degraded
-performance.
+re-create only the necessarily distinct VMM components while cloning
+initialized guest memory and execution context pre-booted virtual machines.
+From this insight we present \emph{HyperFork}, a KVM-based VM cloning
+implementation for serverless computing. We demonstrate that HyperFork
+outperforms standard VM creation latencies by up to two orders of magnitude. We
+further present a thorough analysis of the potential performance degradation
+due to copy-on-write memory sharing. We further demonstrate that
+latency-sensitive workloads display a marked improvement in overall resource
+utilization without degraded performance.
 
 Our implementation is open source and available on Github at
 \href{https://github.com/colavitam/hyperfork-kvmtool}{colavitam/hyperfork-kvmtool}.

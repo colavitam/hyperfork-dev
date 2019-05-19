@@ -7,20 +7,20 @@ overview of the KVM hypervisor and kvmtool virtual machine monitor.
 
 \subsection{KVM Overview}
 
-% TODO KVM is ......
-
-A full KVM system contains a number of major components within a Linux host
-machine, as depicted in Figure~\ref{fig:kvm-arch}. The KVM kernel module tracks
-and maintains most of the sensitive virtualized machine state. Each guest is
-isolated within a standard linux process, which contains both VMM management components
-as well as the running guest. Within the VMM, management components within the
-userspace guest processes communicate with the KVM kernel module via a set of
-ioctls. Outside of the guest processes, the VMM contains CLI based management
-utility programs for administrators which use IPCs to communicate with the
-guest process VMM components. For our implementation, the userspace VMM
-components are implemented in kvmtool, however these same fundamental
-components will exist in other KVM VMM implementations such as
-Firecracker~\cite{firecracker}.
+KVM is a module within the Linux kernel which provides virtualization support
+for running guest machines within linux processes. A full VMM/Hypervisor
+implementation will include functionality from the KVM module within the kernel
+as well as management layers in userspace. Figure~\ref{fig:kvm-arch} depicts
+such a system. The KVM kernel module tracks and maintains most of the sensitive
+virtualized machine state. Each guest is isolated within a standard linux
+process, which contains both VMM management components as well as the running
+guest. Within the VMM, management components within the userspace guest
+processes communicate with the KVM kernel module via a set of ioctls. Outside
+of the guest processes, the VMM contains CLI based management utility programs
+for administrators which use IPCs to communicate with the guest process VMM
+components. For our implementation, the userspace VMM components are
+implemented in kvmtool, however these same fundamental components will exist in
+other KVM VMM implementations such as Firecracker~\cite{firecracker}.
 
 \begin{figure*}[t]
   \includegraphics[width=0.8\textwidth]{{figures/kvm-arch}}
@@ -39,12 +39,20 @@ heavier VMM solutions such as QEMU~\cite{qemu}, which supports a wide range of
 legacy devices and guest configurations.
 
 We selected kvmtool as our userspace VMM as it offers a very similar set of
-functionality to Firecracker, the VMM used to power Amazon Lambda. (TODO:
-contrast firecracker and kvmtool) We chose kvmtool over Firecracker because we
-found that Firecracker was more difficult to work with due to its Rust codebase
-and containerization schemes. kvmtool provides a minimal platform on which to
-test HyperFork applied to Linux guests and closely approximates the VMM of an
-industrial serverless platform.
+functionality to Firecracker, the VMM used to power Amazon Lambda. Both VMMs
+are minimalistic KVM implementations which makes serverless VMM sandboxes easy
+to maintain and deploy on existing linux based environments. By using simple
+and minimalistic implementations, startup time and memory footprint are
+minimized. For increased security in the cloud, Firecracker uses strict
+containerization schemes on top of the VM based sandboxing and is implemented
+in Rust. Firecracker maintains a RESTful API for VM creation and management,
+and provides no other ways to communicate with a guest VM. In contrast, kvmtool
+uses simple IPCs to communicate and manage guest VMs.
+
+We chose kvmtool over Firecracker because we found that Firecracker was more
+difficult to work with due to its Rust codebase and containerization schemes.
+kvmtool provides a minimal platform on which to test HyperFork applied to Linux
+guests and closely approximates the VMM of an industrial serverless platform.
 
 To virtualize efficiently, kvmtool makes use of a number of threads for
 managing vCPUs and emulated devices. Userspace bookkeeping data structures hold
