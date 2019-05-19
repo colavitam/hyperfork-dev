@@ -25,7 +25,61 @@ the best case scenario of cold-booting.
 
 \subsection{Benchmarks}
 
-\begin{figure*}[t]
+
+% TODO: for each of these, we should justify why the benchmark is necessary
+\Paragraph{Fork Time}
+We run several experiments to test the time for a VM to fork. These tests start
+a virtual machine, allocate some memory, and then fork.  The forking process
+marks a timestamp when its fork call returns, and the child marks a timestamp
+once it finishes restoring KVM state.  Figure~\ref{fig:fork-time} shows the
+fork time as recorded by the child VM for varying amounts of allocated guest
+memory.
+
+Even though memory is not copied to the child process unless it is written, it
+still takes time to walk through the parent page table and mark shared memory
+as read-only, and generate page tables for the child process. For this reason
+we expect to see fork times scale roughly linearly with the amount of memory
+allocated pre-fork. Allocating more memory simulates a VM with more programs
+and libraries loaded.
+
+\Paragraph{Copy-on-Write Benchmark} Though cloning VMs using fork can decrease
+VM start times by orders of magnitude, the guest memory mapped in the parent
+and child virtual machine share physical pages until modified, as per Linux's
+copy-on-write feature. As a result, modifications to memory in each of the
+virtual machines can trigger page faults and memory copies that may degrade
+performance. We implement a benchmark to isolate the performance degradation
+caused by copy-on-write operations after cloning.
+
+This program begins by allocating $p$ pages of memory, and writes $b$ bytes of
+random data to each one. This forces pages to be allocated by the host kernel.
+It then signals to the host, which forks the VM. In each child the program then
+performs an additional pass, again writing random data to each of those pages.
+
+Each of those post-fork writes will trap into the host kernel and induce a
+copy. To assess copy-on-write overhead, we measure the time for each of these
+memory passes. We compare passes that trigger a page fault (either due to
+allocation pre-fork, or copying post-fork). We also compare passes that do not
+trigger a page fault (both pre-fork and post-fork).
+
+% TODO: we need to make this specific to the benchmark we actually ran
+\Paragraph{Python Function}
+In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code
+and data are copied on, and the user function is run. These services mostly use
+runtimes like NodeJS or Python. To simulate this sort of workload, we use
+pillow-perf, a Python image processing benchmark. This captures the typical
+scenario of a function which loads an interpreter, loads some external
+libraries, and performs some CPU-bound computation.
+
+We compare the total time of starting $n$ separate VMs, and letting each run
+the benchmark to completion, with the total time of forking $n$ VMs from one
+reference image and letting them run to completion. [TODO: fork at different
+times] The CPU performance of forked VMs should not differ from separately
+booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this
+assumption.
+
+\subsection{Results}
+
+\begin{figure*}[h]
   \center
   \pgfplotstableread{forktime.tab}{\forktimetable}
   \pgfplotstableread{boottime.tab}{\boottimetable}
@@ -92,21 +146,20 @@ the best case scenario of cold-booting.
   \label{fig:boot-time}
 \end{figure*}
 
-% TODO: for each of these, we should justify why the benchmark is necessary
-\Paragraph{Fork Time}
-We run several experiments to test the time for a VM to fork. These tests start
-a virtual machine, allocate some memory, and then fork.  The forking process
-marks a timestamp when its fork call returns, and the child marks a timestamp
-once it finishes restoring KVM state.  Figure~\ref{fig:fork-time} shows the
-fork time as recorded by the child VM for varying amounts of allocated guest
-memory.
+\Paragraph{Fork Time} Figure~\ref{fig:boot-time} shows our measurement results
+for our fork and boot time benchmarks. Error bars indicate the $2.5$- and
+$97.5$-percentiles. Using the small image constructed for our benchmarks, we
+observed boot times of approximately $563$ ms for a $512$ MB virtual machine.
+Boot times increased slightly as memory size increased and overall exhibited
+very low variance.
 
-Even though memory is not copied to the child process unless it is written, it
-still takes time to walk through the parent page table and mark shared memory
-as read-only, and generate page tables for the child process. For this reason
-we expect to see fork times scale roughly linearly with the amount of memory
-allocated pre-fork. Allocating more memory simulates a VM with more programs
-and libraries loaded.
+The fork operation, on the other hand, took an average of $7.43$ ms to complete
+a fork of a $512$ MB virtual machine. This is an improvement of nearly two
+orders of magnitude. Again, we observed very little variance in our
+measurements. Fork time appears to scale linearly with the memory size of the
+virtual machine, likely because the number of page mappings to be duplicated
+scales linearly with the memory size. However, even at large memory sizes, the
+forking eliminates more than $95$\% of the boot time.
 
 \begin{figure*}[t]
 
@@ -194,6 +247,16 @@ and libraries loaded.
 \label{fig:rambench}
 \end{figure*}
 
+\Paragraph{Copy-on-Write Benchmark}
+Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two
+graphs each show the stages of the benchmark: The blue columns show the time to
+write random data to each page of a large memory allocation. The red columns
+show the time to rewrite those pages. On the left, we fork between running
+these two stages, so any memory accesses in the second stage will require a
+page fault, copy, and resume. On the right we do not fork, so no page fault is
+required. This experiment shows approximately a 28\% performance penalty for
+memory accesses which trigger copy-on-write behavior.
+
 \pgfplotstableread[col sep=comma,trim cells=true]{pybench.tab}{\pytable}
 \pgfplotstableread[col sep=comma,trim cells=true]{pybenchtimes.tab}{\pytimetable}
 
@@ -227,6 +290,7 @@ and libraries loaded.
   \end{tikzpicture}
   \label{fig:pybench}
 \caption{Cumulative CPU time for 64 runs of python benchmark}
+\label{fig:pycpu}
 \end{figure*}
 
 \begin{figure*}
@@ -241,55 +305,11 @@ and libraries loaded.
   \end{tabular}
 
   \caption{Mean benchmark completion time (with $95$\% confidence interval)}
+  \label{}
 \end{figure*}
 
-\Paragraph{Copy-on-Write Benchmark}
-Though cloning VMs using Fork can decrease VM start times by orders of
-magnitude because of shared memory, performing Copy-on-Write on those shared
-regions has the potential to reduce performance. We implement a benchmark to
-isolate the performance degradation caused by Copy-on-Write operations after
-cloning.
 
-This program begins by allocating $p$ pages of memory, and writes $b$ bytes of
-random data to each one. It then signals to the host, which forks the VM $n$
-times. In each child the program then writes more random data to each of those
-pages.
-
-Each of those post-fork writes will trap into the host kernel and induce a
-copy. We compare the average time to completion of child VMs to the time it
-takes a VM that has not forked to perform the same writes.
-
-% TODO: we need to make this specific to the benchmark we actually ran
-\Paragraph{Python Function}
-In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code
-and data are copied on, and the user function is run. These services mostly use
-runtimes like NodeJS or Python. To simulate this sort of workload, we use
-pillow-perf, a Python image processing benchmark. This captures the typical
-scenario of a function which loads an interpreter, loads some external
-libraries, and performs some CPU-bound computation.
-
-We compare the total time of starting $n$ separate VMs, and letting each run
-the benchmark to completion, with the total time of forking $n$ VMs from one
-reference image and letting them run to completion. [TODO: fork at different
-times] The CPU performance of forked VMs should not differ from separately
-booted VMs. Using a CPU-bound benchmark like pillow-perf verifies this
-assumption.
-
-\subsection{Results}
-
-\Paragraph{Fork Time}
-% TODO: write interpretation
-
-\Paragraph{Copy-on-Write Benchmark}
-Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two
-graphs each show the stages of the benchmark: The blue columns show the time to
-write random data to each page of a large memory allocation. The red columns
-show the time to rewrite those pages. On the left, we fork between running
-these two stages, so any memory accesses in the second stage will require a
-page fault, copy, and resume. On the right we do not fork, so no page fault is
-required. This experiment shows approximately a 28\% performance penalty for
-memory accesses which trigger copy-on-write behavior.
-
-\Paragraph{Python Function}
-% TODO: write interpretation
+\Paragraph{Python Function} Figure~\ref{fig:pycpu} displays the cumulative CPU
+time required for the python benchmark. We see a significant improvement when
+forking compared to booting 64 independent virtual machines. % TODO (Michael): continue
 
