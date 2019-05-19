@@ -1,27 +1,28 @@
 % !TEX root = top.tex above command is so that compilation is always from
 % top.tex
 \section{Introduction \& Motivation} \label{sec:intro}
+
 \Paragraph{Serverless Computing} Serverless computing, also known as
-\emph{Functions-as-a-Service} (FaaS), has become an increasingly important and
-desirable platform in the cloud ecosystem. Stemming from the grand vision of
-computation as a utility, serverless computing offers users the ability to run
-application code directly on a black-box infrastructure. In comparison to
-current cloud computing platforms, serverless users (1) no longer have to
-manage virtual machine environments, (2) are billed only for application
-computation performed in response to requests, and (3) function instances are
-auto-scaled to handle dynamically changing request rates. Options are available
-from all of the major cloud players, including Amazon Lambda, Azure Functions,
-and Google Cloud Functions. Several significant online companies have
-implemented parts of their services on serverless platforms, notably the news
-site The
+\emph{Function-as-a-Service} (FaaS), has become an increasingly prevalent
+platform in the cloud computing ecosystem. In an attempt to realize a vision of
+computation as a utility, serverless computing allows users to run application
+code in response to triggers without provisioning infrastructure. In comparison
+to current cloud computing platforms, clients no longer have to maintain
+virtual machine images, are billed only for application computation performed
+in response to requests, and benefit from autoscaling to handle variable
+request rates. Platforms are available from all major cloud computing
+companies, including Amazon Lambda, Azure Functions, and Google Cloud
+Functions. Several significant enterprise customers have moved parts of their
+services onto serverless platforms, including the news site The
 Guardian.\footnote{https://aws.amazon.com/solutions/case-studies/the-guardian/}.
 
+% TODO: edit
 \Paragraph{Serverless Infrastructure} The typical implementation of a
 serverless computing platform places user-submitted functions onto dynamically
 created Virtual Machines (VMs). These functions are intended to be light-weight
 stateless single-process programs. Because of the relatively short run-times of
 serverless functions, a critical performance constraint in serverless
-infrastructure implementations is the scheduling latency of functions -- mainly
+infrastructure implementations is the scheduling latency of functions--mainly
 comprising of the creation time for instance VMs. A standard optimization
 employed for this start-up time is to keep instance VMs running for a period of
 time, and schedule function requests onto existing VMs. This leads to a number
@@ -34,6 +35,7 @@ must be created for the function. Functions from different users are usually
 not placed in the same VM for security and isolation reasons, but one VM can
 host several instances of one user's function.
 
+% TODO: edit, and we need to cite numbers here to motivate our work
 \Paragraph{The Problem with Serverless: Cold-start} A central promise of
 serverless computing services is rapid scalability. Meeting this demand at
 scale requires that new function instances can be started very quickly to
@@ -48,6 +50,7 @@ devices, then the guest kernel and file system must be loaded from disk and
 initialized in guest memory, then the guest kernel is booted, and finally the
 function runtime/process is started and the request is handled.
 
+% TODO: edit, (1) is misleading, as the filesystem doesn't need to be loaded into memory
 \Paragraph{Flash Cloning} The most significant parts of VM creation are (1)
 copying the kernel and file system into memory, (2) booting the guest kernel,
 and (3) loading potentially large libraries/runtimes. Management operations
@@ -70,14 +73,17 @@ reference VMs.
 From this insight we present \emph{HyperFork}, a KVM-based VM cloning
 implementation for the context of serverless computing.
 
-\Paragraph{Contributions} Our contributions are as follows: \begin{itemize}
-\item A KVM based virtual machine cloning implementation which outperforms
-standard VM creation latencies by up to AMAZING\%
+\Paragraph{Contributions} Our contributions are as follows:
+\begin{itemize}
+\item HyperFork, A KVM-based virtual machine cloning implementation which outperforms
+standard VM creation latencies by up to two orders of magnitude
 \item A thorough discussion of the trade-offs related to a number of potential
-implementations for VM creation in the context of serverless computing.
+implementations for VM creation in the context of serverless computing % TODO: what?
 \item A thorough analysis of the performance of Hyperfork for both VM creation
 latency as well as VM co-location density and performance degredation with
-respect to copy-on-write memory sharing.
+respect to copy-on-write memory sharing % TODO: colocation density?
 \end{itemize}
 
-The rest of the paper is organized as follows. Section 2 provides an overview of KVM and the hypervisor \emph{kvmtool}, and then describes the implementation details of \emph{HyperFork}. Section 3 describes our experimental evaluation. Section 4 presents a background and review of related work.
+Our implementation and benchmarks are open source and available at %TODO: link
+
+The rest of the paper is organized as follows. Section 2 provides an overview of KVM and the hypervisor \emph{kvmtool}, and then describes the implementation details of \emph{HyperFork}. Section 3 describes our experimental evaluation. Section 4 presents a background and review of related work. % TODO: numbers wrong

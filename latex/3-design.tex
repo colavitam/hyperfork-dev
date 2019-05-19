@@ -1,17 +1,14 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 
-\section{Platform Architecture} \label{sec:design}
+\section{Background} \label{sec:design}
 
-In this section we describe the platform HyperFork is build upon, including an overview of KVM and kvmtool.
-
-
-
-Describe Xen vs KVM. kvmtool vs. Firecracker. Amazon Linux vs our small
-kernels. This is where many of our foundational design decisions should be
-justified. The following sections describe our implementation decisions.
+In this section we describe the platforms HyperFork is built upon, including an
+overview of the KVM hypervisor and kvmtool virtual machine monitor.
 
 \subsection{KVM Overview}
+
+% TODO KVM is ......
 
 A full KVM system contains a number of major components within a Linux host
 machine, as depicted in Figure~\ref{fig:kvm-arch}. The KVM kernel module tracks
@@ -32,7 +29,7 @@ Firecracker~\cite{firecracker}.
   \label{fig:kvm-arch}
 \end{figure*}
 
-\subsubsection{kvmtool}
+\subsection{kvmtool}
 
 kvmtool~\cite{kvmtool} is a VMM implementation for KVM with the minimal
 functionality required to boot a fully functional linux kernel with very basic
@@ -69,7 +66,7 @@ creates one thread per vCPU that proceeds in a loop, invoking the
 arise. Together, this set of threads enables efficient virtualization of the
 guest and its devices.
 
-\section{HyperFork Implementation}
+\section{Implementation}
 
 We now describe the architecture and implementation of Hyperfork, along with
 our design decisions regarding the flash-cloning operation.
@@ -93,7 +90,7 @@ their memory mappings. This creates quite a mess in practice.} We also add an
 ad-hoc guest-to-host communication channel with an extension to kvmtool to
 enable our experimental evaluations.
 
-\subsubsection{Flash-Cloning Support in kvmtool}
+\subsection{Flash-Cloning Support in kvmtool}
 
 Our userspace HyperFork implementation for kvmtool proceeds in a series of
 phases. At a high level, these phases are a triggering event, pre-fork
@@ -151,7 +148,7 @@ thread. In the child, this thread creates a new IPC handling thread and then
 assumes the role of the main kvmtool run thread, waiting on the guest vCPU0 to
 exit and then terminating the VM gracefully.
 
-\subsubsection{Guest-to-Host Signaling}
+\subsection{Guest-to-Host Signaling}
 
 For guests with more complex forking behavior, the guest may need to inform the
 host when it is ready to fork. For example, a virtual machine running a python

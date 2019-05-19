@@ -1,8 +1,9 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
-\section{Related Work or Background} \label{sec:related}
+\section{Related Work} \label{sec:related}
 Our work in this paper draws on concepts from several lines of past research.
 
+% TODO: I'm not convinced the history in this paragraph adds anything to the paper
 \Paragraph{Virtualization Technology} Machine virtualization technology is
 a complex and diverse space. Classical Hypervisors/Virtual Machine Monitors
 (VMMs) relied on the fundamental primitive of \emph{Trap-and-Emulate}, where
@@ -27,6 +28,7 @@ used within the research community because of its relatively simple
 software-only techniques, and KVM is valued for its tight integration with the
 Linux kernel.
 
+% TODO: I feel like we already said all of this in the intro. Is there anything new to add here?
 \Paragraph{Serverless Computing} Serverless computing has become an
 increasingly important and desirable platform in the cloud ecosystem. Stemming
 from the grand vision of computation as a utility, serverless computing offers
@@ -40,7 +42,8 @@ today~\cite{lambda}\cite{gcf}\cite{azure-cf}\cite{openwhisk}, serverless is
 still an active area of research, with many improvements to be
 made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
-\Paragraph{Cold-start Reduction Efforts} There exists a number of different
+% TODO: we need to make the distinction between unikernels and Amazon-style microkernels more clear; we seem to conflate them here
+\Paragraph{Cold-start Reduction Efforts} There exist a number of different
 techniques which have been proposed in order to reduce cold-start
 latencies. One broad technique is to reduce the size and complexity of VMs
 which are used for serverless functions. Because serverless functions running
@@ -76,4 +79,6 @@ live migration in general contains a superset of the functionality needed for
 flash-cloning, but is focused on efficiently supporting the migration of VM
 state across a slow network with minimal interruption to the VM. For serverless
 computing infrastructure, we are focused on extremely low latency and therefore
-do not want the complex techniques used for live-migration.
+do not want the complex techniques used for live-migration. We rely on many
+features pioneered by live migration research in order to efficiently duplicate
+virtual machine state.

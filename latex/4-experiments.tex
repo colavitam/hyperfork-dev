@@ -18,7 +18,7 @@ general purpose Linux distribution image. Since FaaS uses very short-lived
 instances, there is no need for package managers, update utilities, or other
 maintenance software.
 
-Using a minimal image also presents cold-boot times in the best possible
+Using a minimal image also presents cold-boot times in an idealistic
 environment, as a heavier image would take longer to boot. We therefore show
 that our implementation offers substantial start time improvements over even
 the best case scenario of cold-booting.
@@ -91,10 +91,11 @@ the best case scenario of cold-booting.
   \label{fig:boot-time}
 \end{figure*}
 
+% TODO: for each of these, we should justify why the benchmark is necessary
 \Paragraph{Fork Time}
 We run several experiments to test the time for a VM to fork. These tests start
 a virtual machine, allocate some memory, and then fork.  The forking process
-marks a timestamp when its fork() call returns, and the child marks a timestamp
+marks a timestamp when its fork call returns, and the child marks a timestamp
 once it finishes restoring KVM state.  Figure~\ref{fig:fork-time} shows the
 fork time as recorded by the child VM for varying amounts of allocated guest
 memory.
@@ -241,7 +242,7 @@ and libraries loaded.
   \caption{Mean benchmark completion time (with $95$\% confidence interval)}
 \end{figure*}
 
-\Paragraph{Copy-on-Write Test}
+\Paragraph{Copy-on-Write Benchmark}
 Though cloning VMs using Fork can decrease VM start times by orders of
 magnitude because of shared memory, performing Copy-on-Write on those shared
 regions has the potential to reduce performance. We implement a benchmark to
@@ -257,7 +258,8 @@ Each of those post-fork writes will trap into the host kernel and induce a
 copy. We compare the average time to completion of child VMs to the time it
 takes a VM that has not forked to perform the same writes.
 
-\Paragraph{Real-world Conditions}
+% TODO: we need to make this specific to the benchmark we actually ran
+\Paragraph{Python Function}
 In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code
 and data are copied on, and the user function is run. These services mostly use
 runtimes like NodeJS or Python. To simulate this sort of workload, we use
@@ -275,7 +277,9 @@ assumption.
 \subsection{Results}
 
 \Paragraph{Fork Time}
-\Paragraph{Copy-on-Write}
+% TODO: write interpretation
+
+\Paragraph{Copy-on-Write Benchmark}
 Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two
 graphs each show the stages of the benchmark: The blue columns show the time to
 write random data to each page of a large memory allocation. The red columns
@@ -285,19 +289,6 @@ page fault, copy, and resume. On the right we do not fork, so no page fault is
 required. This experiment shows approximately a 28\% performance penalty for
 memory accesses which trigger copy-on-write behavior.
 
-%\Paragraph{Explaining Each Figure}
-%We first put the most important figures, i.e., the
-%ones that have the most important results in terms
-%of the contributions. Each figure should be a
-%single message. Each figure comes with two
-%paragraphs. One paragraph for the setup and one
-%paragraph for the discussion. The set-up paragraph
-%should start by saying ``In this experiment we
-%show that... We setup this experiment as follows...''.
-%
-%The result paragraph explains in detail why we see
-%what we see. Explanations should be based on facts
-%and logic. Numbers that back up the explanations
-%should be provided whenever possible. The
-%paragraph should finish by repeating the main
-%message again.
+\Paragraph{Python Function}
+% TODO: write interpretation
+
