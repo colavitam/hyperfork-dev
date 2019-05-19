@@ -43,10 +43,9 @@ Unikernels~\cite{unikernels} and the Denali OS~\cite{denali}, where there is no
 real division between operating system and application code.
 
 Other approaches to efficient resource isolation put the isolation boundary
-above the operating system level. Containerization technologies such as
-Docker~\cite{docker} utilize Linux cgroups~\cite{cgroups} and
+above the operating system level. Containerization technologies such as Docker~\cite{docker} utilize Linux cgroups~\cite{cgroups} and
 seccomp~\cite{seccomp} mechanism to isolate processes. While these offer very
-fast startup times compared to Virtual Machines, they are a weaker form of
+fast startup times compared to virtual machines, they are a weaker form of
 isolation, as processes in containers still share a kernel.
 
 Another technique for reducing VM creation latencies involves the process of

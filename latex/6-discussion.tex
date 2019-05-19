@@ -30,6 +30,46 @@ reproducing a microVM environment would provide a state-of-the-art baseline for
 comparison. It may also be instructive to benchmark start times for Docker and
 other alternative isolation methods.
 
+\Paragraph{Current Limitations} While our current HyperFork implementation
+provides a reliable fork primitive for our basic benchmarks, it has several
+limitations that would need to be addressed before production deployment.
+Currently, only read-only root filesystems are supported. Read-write
+filesystems can cause corruption when multiple forked virtual machines have
+contradictory state. We observed this several times in practice. This could be
+addressed by adding an overlay layer to the block device driver that stores
+writes to the file system in VMM memory instead of persisting them to disk,
+making writes from different virtual machines invisible to each other.
+
+We have not added support for all of kvmtool's devices to Hyperfork.
+Specifically, the network device and virtio balloon device are not
+supported. Additionally, kvmtool has an outstanding bug in its terminal
+emulation that manifests in degraded performance after forking. We have worked
+around this in our current implementation.
+
+Additionally, there is an outstanding race condition in the kvm-clock feature,
+a paravirtualized clock accessible from the guest virtual machine. This
+manifests itself as occasional non-monotonicity in the guest, causing prolonged
+kernel-level stalls in the guest virtual machine. For our tests, we have
+disabled kvm-clock to avoid these problems. We suspect it can be resolved by
+careful adjustment of the clock when restoring virtual machine state.
+
+We have made no attempts to support architectures other than 32/64-bit x86. As
+some serverless deployments begin to utilize ARM for certain workloads, support
+for other architectures is becoming increasingly important. We do not
+anticipate much difficulty in porting our implementation to other architectures
+due to the regularity of the KVM API.
+
+\Paragraph{Additional Research} Currently, HyperFork operates entirely in
+userspace by serializing all KVM state pre-fork and then recreating it
+post-fork. We suspect that a kernel-mode implementation may offer further
+performance benefits. This avoids the overhead of copying KVM state into
+userpace and then back into the kernel, instead just passing the state directly
+between the KVM backing structures for the parent and child processes. We began
+an implementation of such a kernel-mode HyperFork primitive, but abandoned it
+due to ballooning complexity. As the total state copied from KVM to userspace
+is on the order of several kilobytes, we suspect savings would be insufficient
+to justify the complexity.
+
 Furthermore, for virtual machines with larger memory footprints, the linear
 scaling of fork time cuts into performance improvements due to the large
 pagetables which must be duplicated. One potential solution is to use
@@ -40,3 +80,12 @@ the linear component of the fork operation. Note, however, that this may have
 implications for memory performance, as larger pages must be duplicated in
 their entirety in the case of a page fault (absent a more complex copy-on-write
 mechanism)~\cite{hugepages}.
+
+There are several serious security concerns with cloning virtual machines in
+production. ASLR and KASLR are defeated, since the guest memory is copied
+exactly. It is also not desirable for two guest VMs to share a source of
+randomness, so any random generators would need to be re-seeded in the child
+VM. A more thorough analysis of security risks introduced by flash-cloning of
+virtual machines is needed. These results can motivate decisions as to whether
+serverless instances for different customers can be forked from the same
+reference virtual machine.
