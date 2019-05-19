@@ -20,51 +20,49 @@ improvements to be made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
 \Paragraph{Serverless Infrastructure} The typical implementation of a
 serverless computing platform places user-submitted functions onto dynamically
-created Virtual Machines (VMs). These functions are intended to be light-weight
-stateless single-process programs. Because of the relatively short run-times of
-serverless functions, a critical performance constraint in serverless
-infrastructure implementations is the scheduling latency of functions--mainly
-comprising of the creation time for instance VMs. A standard optimization
-employed for this start-up time is to keep instance VMs running for a period of
-time, and schedule function requests onto existing VMs. This leads to a number
-of other properties, including limits on function run-time and the potential
-for functions to be terminated at any time. This is necessary for the scheduler
-to auto-scale instances efficiently. Another property is the clear split in
-individual function start-up latencies between \emph{warm-starts}, where a function
-is scheduled to an already running instance, and \emph{cold-starts}, where a new VM
-must be created for the function. Functions from different users are usually
-not placed in the same VM for security and isolation reasons, but one VM can
-host several instances of one user's function.
+created virtual machines (VMs). These functions are intended to be light-weight
+stateless programs. Because of the relatively short run-times of serverless
+functions, a critical performance constraint in serverless infrastructure
+implementations is the scheduling latency of functions---mainly comprised of
+the creation time for instance VMs. A standard optimization employed for
+start-up time is to keep instance VMs running for a period of time, and
+schedule function requests onto existing VMs. Another property is the clear
+split in individual function start-up latencies between \emph{warm-starts}, in
+which a function is scheduled to an already running instance, and
+\emph{cold-starts}, in which a new VM must be created for the function.
+Functions from different customers are usually not placed in the same VM for
+security and isolation reasons, but one VM can host several instances of one
+customer's function.
 
-\Paragraph{The Problem with Serverless: Cold-start} A central promise of
-serverless computing services is rapid scalability. Meeting this demand at
-scale requires that new function instances can be started very quickly to
-service incoming requests. This is easy when there exist currently running
-warm instances but more difficult when a new cold instance must be started.
-Prevous work has recorded Amazon Lambda warmstart latencies of around 25ms, and
-cold-start latencies of 250ms~\cite{peeking}. For cold-start, one significant
-bottleneck is the creation of a new VM. In the Amazon Firecracker
-specification~\cite{firecracker-spec}, new VMs are specified to boot in under
-125ms, a significant chunk of the coldstart latency. Pools or buffers of ready
-VMs may help, but to approach warmstart latencies, improvement in VM creation
-latencies will be needed. To create a VM, the host Hypervisor/Virtual Machine
-Monitor (VMM) must initialize virtual resources including CPUs, memory, and
-other devices, then the guest kernel must be loaded from disk and initialized
-in guest memory, then the guest kernel must be booted, and finally the function
-runtime/process can be started and the request handled.
+\Paragraph{Cold-start Latency} A central promise of serverless computing
+services is rapid scalability. Meeting this demand at scale requires that new
+function instances can be started very quickly to service incoming requests.
+This is easy when there remain available warm instances, but is more difficult
+when a new cold instance must be started. Prevous work has recorded Amazon
+Lambda warm-start latencies of around 25ms, and cold-start latencies of
+250ms~\cite{peeking}.
+
+For cold-start, one significant bottleneck is the boot time of a new VM. In the
+Amazon Firecracker specification~\cite{firecracker-spec}, new VMs are
+benchmarked to boot in about 125ms, a significant portion of cold-start
+latency. To improve cold-start latencies, reductions in VM creation times are
+needed. To create a VM, the host hypervisor and virtual machine Monitor (VMM)
+must initialize virtual resources including vCPUs, memory, and other devices,
+then the guest kernel must be loaded from disk and initialized in guest memory.
+The guest kernel will then boot, and finally the function runtime can be
+started and the request handled.
 
 \Paragraph{Flash Cloning} Three significant parts of VM creation include (1)
-loading the kernel into memory, (2) booting the guest kernel,
-and (3) loading potentially large libraries/runtimes. Management operations
-within the VMM such as virtual device creation and resource allocation are
-relatively cheap compared to the start-up within a guest and the copying of
-guest memory. Optimizing these steps could dramatically reduce the startup
-latency of new serverless functions. One technique to do this is to employ
-\emph{flash cloning}. Instead of loading VM images from disk and booting a
-kernel, we propose cloning existing reference VMs in memory. Additionally, we
-propose a copy-on-write mechanic to reduce both the copy time overhead and the
-memory pressure of packing many VMs onto one host. This method can be compared
-to the Unix fork abstraction.
+loading the kernel into memory, (2) booting the guest kernel, and (3) loading
+potentially large libraries and runtimes. Management operations within the VMM
+such as virtual device creation and resource allocation are relatively cheap
+compared to a guest's boot time. Optimizing these steps could dramatically
+reduce the startup latency of new serverless functions. One technique to do so
+is to employ \emph{flash cloning}. Instead of loading VM images from disk and
+booting a kernel, we propose cloning existing reference VMs in memory.
+Additionally, we propose a copy-on-write mechanism to reduce both the copy time
+and the memory pressure of packing many VMs onto one host. This method can be
+compared to the Unix fork abstraction.
 
 \Paragraph{HyperFork} To create a new, isolated virtual machine, we propose to
 re-create only the necessarily distinct VMM components while cloning
