@@ -7,16 +7,17 @@
 platform in the cloud computing ecosystem. In an attempt to realize a vision of
 computation as a utility, serverless computing allows users to run application
 code in response to triggers without provisioning infrastructure. In comparison
-to current cloud computing platforms, clients no longer have to maintain virtual
-machine images, are billed only for application computation performed in
-response to requests, and benefit from autoscaling to handle variable request
-rates.~\cite{berkeley-serverless} Platforms are available from all major cloud
-computing companies, including Amazon Lambda~\cite{lambda}, Azure
+to current cloud computing platforms, clients no longer have to maintain
+virtual machine images, are billed only for application computation performed
+in response to requests, and benefit from autoscaling to handle variable
+request rates.~\cite{berkeley-serverless} Platforms are available from all major
+cloud computing vendors, including Amazon Lambda~\cite{lambda}, Azure
 Functions~\cite{azure-cf}, and Google Cloud Functions~\cite{gcf}. Several
 significant enterprise customers have moved parts of their services onto
 serverless platforms, including the news site The Guardian~\cite{guardian}.
 Serverless computing is currently an active area of research, with many
-improvements to be made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
+performance and theoretical improvements to be
+made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
 \Paragraph{Serverless Infrastructure} The typical implementation of a
 serverless computing platform places user-submitted functions onto dynamically
@@ -36,10 +37,10 @@ customer's function.
 
 \Paragraph{Cold-start Latency} A central promise of serverless computing
 services is rapid scalability. Meeting this demand at scale requires that new
-function instances can be started very quickly to service incoming requests.
-This is easy when there remain available warm instances, but is more difficult
-when a new cold instance must be started. Prevous work has recorded Amazon
-Lambda warm-start latencies of around 25ms, and cold-start latencies of
+function instances can be rapidly started to service incoming requests. This is
+easy when there remain available warm instances, but is more difficult when a
+new cold instance must be started. Prevous work has recorded Amazon Lambda
+warm-start latencies of around 25ms, and cold-start latencies of
 250ms~\cite{peeking}.
 
 For cold-start, one significant bottleneck is the boot time of a new VM. In the
