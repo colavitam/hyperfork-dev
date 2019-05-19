@@ -64,27 +64,26 @@ propose a copy-on-write mechanic to reduce both the copy time overhead and the
 memory pressure of packing many VMs onto one host. This method can be compared
 to the Unix fork abstraction.
 
+\Paragraph{HyperFork}
 
-\begin{quote} To create an isolated virtual machine, rather than re-create the
-entire world, we should only re-create the necessarily distinct VMM components
-and clone identical guest memory and execution context from ready-to-go
-reference VMs.
-\end{quote}
+To create a new, isolated virtual machine, we propose to re-create only the
+necessarily distinct VMM components while cloning initialized guest memory and
+execution context pre-booted virtual machines. From this insight we present
+\emph{HyperFork}, a KVM-based VM cloning implementation for serverless
+computing. We demonstrate that HyperFork outperforms standard VM creation
+latencies by up to two orders of magnitude. We further present a thorough
+analysis of the potential performance degradation due to copy-on-write memory
+sharing. We further demonstrate that latency-sensitive workloads display a
+marked improvement in overall resource utilization without degraded
+performance.
 
-From this insight we present \emph{HyperFork}, a KVM-based VM cloning
-implementation for the context of serverless computing.
+Our implementation is open source and available on Github at
+\href{https://github.com/colavitam/hyperfork-kvmtool}{colavitam/hyperfork-kvmtool}.
 
-\Paragraph{Contributions} Our contributions are as follows:
-\begin{itemize}
-\item HyperFork, A KVM-based virtual machine cloning implementation which
-outperforms standard VM creation latencies by up to two orders of magnitude
-\item A thorough analysis of the performance of Hyperfork for both VM creation
-latency as well as performance degredation with respect to copy-on-write memory
-sharing
-\end{itemize}
-
-Our implementation and benchmarks are open source and available at
-\url{https://github.com/colavitam/hyperfork-kvmtool} and
-\url{https://github.com/colavitam/hyperfork-dev}.
-
-The rest of the paper is organized as follows. Section~\ref{sec:related} provides a summary of related work. Section~\ref{sec:background} describes the technologies HyperFork is built upon. Section~\ref{sec:implementation} describes the design and architecture of HyperFork. We evaluate its performance in Section~\ref{sec:evaluation}, discuss the results in Section~\ref{sec:discussion}, and then outline current limitations and future directions in Section~\ref{sec:future}.
+The rest of the paper is organized as follows. Section~\ref{sec:related}
+provides a summary of related work. Section~\ref{sec:background} describes the
+technologies HyperFork is built upon. Section~\ref{sec:implementation}
+describes the design and architecture of HyperFork. We evaluate its performance
+in Section~\ref{sec:evaluation}, discuss the results in
+Section~\ref{sec:discussion}, and then outline current limitations and future
+directions in Section~\ref{sec:future}.
