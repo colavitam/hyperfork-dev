@@ -7,7 +7,6 @@ page duplication, and end-to-end benchmarks to measure throughput and resource
 utilization improvements.
 
 \Paragraph{Experimental Setup}
-
 We perform all tests on an m5.metal instance from Amazon Web Services EC2,
 which features 96 logical processors and 384 GB of memory. The file system
 image used for all tests is a minimal Linux setup generated using the buildroot
@@ -26,12 +25,14 @@ the best case scenario of cold-booting.
 
 \subsection{Benchmarks}
 
-\begin{figure}[t]
-
+\begin{figure*}[t]
+  \center
   \pgfplotstableread{forktime.tab}{\forktimetable}
+  \pgfplotstableread{boottime.tab}{\boottimetable}
 
   \begin{tikzpicture}
   \begin{axis}[
+      width=0.45\textwidth,
       title={Time for Virtual Machine Fork},
       xlabel={Guest Memory (MB)},
       ylabel={Time (ms)},
@@ -57,16 +58,10 @@ the best case scenario of cold-booting.
       ] {\forktimetable};
   \end{axis}
   \end{tikzpicture}
-  \caption{Time for virtual machine fork ($n = 600$)}
   \label{fig:fork-time}
-\end{figure}
-
-\begin{figure}[t]
-
-  \pgfplotstableread{boottime.tab}{\boottimetable}
-
   \begin{tikzpicture}
   \begin{axis}[
+      width=0.45\textwidth,
       title={Time for Virtual Machine Cold Start},
       xlabel={Guest Memory (MB)},
       ylabel={Time (ms)},
@@ -92,12 +87,11 @@ the best case scenario of cold-booting.
       ] {\boottimetable};
   \end{axis}
   \end{tikzpicture}
-  \caption{Time for virtual machine cold start ($n = 100$)}
+  \caption{Time for virtual machine cold start vs. fork}
   \label{fig:boot-time}
-\end{figure}
+\end{figure*}
 
 \Paragraph{Fork Time}
-
 We run several experiments to test the time for a VM to fork. These tests start
 a virtual machine, allocate some memory, and then fork.  The forking process
 marks a timestamp when its fork() call returns, and the child marks a timestamp
@@ -119,10 +113,10 @@ and libraries loaded.
 \pgfplotstableread{pagefault.tab}{\cowtable}
 \pgfplotstableread{nopagefault.tab}{\memtable}
 
-\begin{tikzpicture}[trim axis left]
+\begin{tikzpicture}
 \begin{axis}[
   width=0.45\textwidth,
-  title={Time for Memory Pass, Page Fault Required},
+  title={Time for Memory Pass, With Page Fault},
 	xtick=data,
   symbolic x coords={128,256,512,1024,1536},
 	ylabel={Time (ms)},
@@ -156,8 +150,8 @@ and libraries loaded.
   \legend{Before fork, After fork}
 \end{axis}
 \end{tikzpicture}
-\hspace{0.75in}
-\begin{tikzpicture}[trim axis left]
+%\hspace{0.75in}
+\begin{tikzpicture}
 \begin{axis}[
   width=0.45\textwidth,
   title={Time for Memory Pass, No Page Fault},
@@ -219,45 +213,22 @@ and libraries loaded.
       grid style=dashed
     ]
       \addplot+[
-        error bars/.cd,
-      x dir=both, x explicit
+        %error bars/.cd,
+      %x dir=both, x explicit
     ]
       table [
         y = mode,
       x = total,
-      x error = moe,
+      %x error = moe,
     ] {\pytable};
     \end{axis}
   \end{tikzpicture}
   \label{fig:pybench}
-%\begin{tikzpicture}
-%\begin{axis}[
-%  width=0.45\textwidth,
-%  title={Python Benchmark Times},
-%  xmin=2,xmax=2.6,
-%	ytick=data,
-%  symbolic y coords={None, After Boot, After Interpreter, After Packages},
-%  xlabel={Cumulative CPU Time (s)},
-%	xbar,
-%	%bar width=7pt,
-%  xmajorgrids=true,
-%  grid style=dashed
-%]
-%\addplot+[
-%  error bars/.cd,
-%  x dir=both, x explicit
-%  ]
-%  table [
-%  y = mode,
-%  x = total,
-%  x error = moe,
-%  ] {\pytimetable};
-%\end{axis}
-%\end{tikzpicture}
-\caption{TODO: caption here}
+\caption{Cumulative CPU time for 64 runs of python benchmark}
 \end{figure*}
 
-\begin{figure}
+\begin{figure*}
+  \center
   \begin{tabular}{|c|c|c|}
     \hline
     Fork Point & Benchmark Time (ms) & Relative Time \\ \hline
@@ -268,10 +239,9 @@ and libraries loaded.
   \end{tabular}
 
   \caption{Mean benchmark completion time (with $95$\% confidence interval)}
-\end{figure}
+\end{figure*}
 
 \Paragraph{Copy-on-Write Test}
-
 Though cloning VMs using Fork can decrease VM start times by orders of
 magnitude because of shared memory, performing Copy-on-Write on those shared
 regions has the potential to reduce performance. We implement a benchmark to
@@ -288,7 +258,6 @@ copy. We compare the average time to completion of child VMs to the time it
 takes a VM that has not forked to perform the same writes.
 
 \Paragraph{Real-world Conditions}
-
 In the lifecycle of a typical Function-as-a-Service unit, a VM is started, code
 and data are copied on, and the user function is run. These services mostly use
 runtimes like NodeJS or Python. To simulate this sort of workload, we use
@@ -306,9 +275,7 @@ assumption.
 \subsection{Results}
 
 \Paragraph{Fork Time}
-
 \Paragraph{Copy-on-Write}
-
 Figure~\ref{fig:rambench} shows the results of our copy-on-write test. The two
 graphs each show the stages of the benchmark: The blue columns show the time to
 write random data to each page of a large memory allocation. The red columns

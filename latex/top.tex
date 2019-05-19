@@ -13,21 +13,24 @@
 
 %%%%%%%%%%%
 %Set the type of the document (only one)
-\SIGMODtrue
+%\SIGMODtrue
 %\ARTICLEtrue
 %\VLDBtrue
 %%%%%%%%%%%
 
 %%%%%%%%%%%
 %Set whether you want to see the draft version
-\DRAFTfalse %control
+%\DRAFTfalse %control
 %%%%%%%%%%%
 
-\input{init.tex}
+%\input{init.tex}
 
 %%%%%%%%%%%
 % Setting up the conference
-\documentclass[\varDraft]{\templateName}
+\documentclass[11pt,twocolumn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\setstretch{1}
 %%%%%%%%%%%
 
 %%%%%%%%%%%
@@ -44,8 +47,10 @@
 
 %%%%%%%%%%%
 %Packages, settings and custom commands
-\input{settings.tex}
+%\input{settings.tex}
 \usepackage{pgfplots}
+\usepackage{cite}
+\usepackage{hyperref}
 %%%%%%%%%%%
 
 \begin{document}
@@ -60,6 +65,8 @@
 %\putfigure{t}{draft,width=\columnwidth}{./figures/fig1.pdf}{-0.1in}{This is caption}{fig:label}{-0.1in}
 %%%%%%%%%%%
 
+\newcommand{\Paragraph}[1]{\vspace{1.5 mm} \noindent {\bf #1.}}
+\newcommand{\ParagraphQ}[1]{\vspace{1.5 mm} \noindent {\bf #1?}}
 
 \begin{abstract}
 \input{0-abstract.tex}
@@ -71,11 +78,7 @@
 \input{4-experiments.tex}
 \input{5-related.tex}
 \input{6-conclusions.tex}
-\input{7-acknowledgments.tex}
 
-\fxnote{Make sure we have the updated version of the conference style}
-
-\balance
 
 %%%%%%%%%%%
 % you need to run "make fetch-library" in order to copy library in this directory
