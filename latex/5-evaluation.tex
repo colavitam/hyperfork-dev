@@ -244,23 +244,6 @@ forking eliminates more than $95$\% of the boot time.
 \label{fig:rambench}
 \end{figure*}
 
-\Paragraph{Copy-on-Write} Figure~\ref{fig:rambench} shows the results
-of our copy-on-write test. Each graph shows the performance before and after
-the fork operation. Error bars indicate $2.5$- and $97.5$-percentiles. When
-memory writes do not trigger a page fault (left plot), performance does not
-appear to change before or after a page fault. This means that after pages have
-been allocated (or reallocated after being copied on write), there is no
-significant memory performance penalty.
-
-When writes do trigger a page fault (right plot), we observe a considerable
-difference before and after the fork operation. Before the fork operation, page
-faults occur when we write to pages that have not yet been allocated. The
-kernel then allocates a zeroed page and returns. After the fork operation, page
-faults trigger a page copy. We observe a roughly $28\%$ performance penalty for
-the memory benchmark when pages must be copied. As expected, the benchmark time
-scales roughly linearly with the number of pages for which a page fault is
-triggered.
-
 \pgfplotstableread[col sep=comma,trim cells=true]{pybench.tab}{\pytable}
 \pgfplotstableread[col sep=comma,trim cells=true]{pybenchtimes.tab}{\pytimetable}
 
@@ -312,6 +295,23 @@ triggered.
   \label{fig:pybench}
 \end{figure*}
 
+
+\Paragraph{Copy-on-Write} Figure~\ref{fig:rambench} shows the results
+of our copy-on-write test. Each graph shows the performance before and after
+the fork operation. Error bars indicate $2.5$- and $97.5$-percentiles. When
+memory writes do not trigger a page fault (left plot), performance does not
+appear to change before or after a page fault. This means that after pages have
+been allocated (or reallocated after being copied on write), there is no
+significant memory performance penalty.
+
+When writes do trigger a page fault (right plot), we observe a considerable
+difference before and after the fork operation. Before the fork operation, page
+faults occur when we write to pages that have not yet been allocated. The
+kernel then allocates a zeroed page and returns. After the fork operation, page
+faults trigger a page copy. We observe a roughly $28\%$ performance penalty for
+the memory benchmark when pages must be copied. As expected, the benchmark time
+scales roughly linearly with the number of pages for which a page fault is
+triggered.
 
 \Paragraph{Python Function} Figure~\ref{fig:pycpu} displays the cumulative CPU
 time required for the python benchmark. The margins of error are negligible
