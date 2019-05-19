@@ -42,13 +42,12 @@ optimizations have also been explored previously in a more extreme form, with
 Unikernels~\cite{unikernels} and the Denali OS~\cite{denali}, where there is no
 real division between operating system and application code.
 
-% TODO: citations
 Other approaches to efficient resource isolation put the isolation boundary
 above the operating system level. Containerization technologies such as
-Docker~\cite{docker} utilize Linux cgroups~\cite{cgroups} and seccomp mechanism
-to isolate processes. While these offer very fast startup times compared to
-Virtual Machines, they are a weaker form of isolation, as processes in
-containers still share a kernel.
+Docker~\cite{docker} utilize Linux cgroups~\cite{cgroups} and
+seccomp~\cite{seccomp} mechanism to isolate processes. While these offer very
+fast startup times compared to Virtual Machines, they are a weaker form of
+isolation, as processes in containers still share a kernel.
 
 Another technique for reducing VM creation latencies involves the process of
 \emph{flash-cloning}, in which new VMs are cloned from existing reference VMs.
