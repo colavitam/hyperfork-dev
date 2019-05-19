@@ -57,6 +57,8 @@ with Unikernels~\cite{unikernels}, the Denali OS~\cite{denali}, and are
 represented in Amazon's custom $\mu$-Kernel and their serverless KVM VMM
 Firecracker~\cite{firecracker}.
 
+% TODO: what about docker, cgroups, etc. that avoid using VMs at all?
+
 Another technique for reducing VM creation latencies involves the process of
 \emph{flash-cloning}, in which new VMs are cloned from existing reference VMs.
 This is an analogous process to forking processes within linux. One work which
