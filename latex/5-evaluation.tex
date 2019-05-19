@@ -1,6 +1,6 @@
 % !TEX root = top.tex above command is so that compilation is always from
 % top.tex
-\section{Evaluation} \label{sec:experiments} We now describe the
+\section{Evaluation} \label{sec:evaluation} We now describe the
 design of our benchmarks for the kvmtool HyperFork implementation. We have
 conducted both microbenchmarks, to test the overhead of fork and copy-on-write
 page duplication, and end-to-end benchmarks to measure throughput and resource
@@ -312,4 +312,3 @@ memory accesses which trigger copy-on-write behavior.
 \Paragraph{Python Function} Figure~\ref{fig:pycpu} displays the cumulative CPU
 time required for the python benchmark. We see a significant improvement when
 forking compared to booting 64 independent virtual machines. % TODO (Michael): continue
-

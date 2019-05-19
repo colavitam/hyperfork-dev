@@ -1,6 +1,6 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
-\section{Background} \label{sec:design}
+\section{Background} \label{sec:background}
 
 In this section we describe the platforms HyperFork is built upon, including an
 overview of the KVM hypervisor and kvmtool virtual machine monitor.
@@ -64,4 +64,3 @@ creates one thread per vCPU that proceeds in a loop, invoking the
 \texttt{KVM\_RUN} ioctl, then handling any IO requests or interrupts that may
 arise. Together, this set of threads enables efficient virtualization of the
 guest and its devices.
-
