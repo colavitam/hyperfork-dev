@@ -21,7 +21,7 @@ maintenance software.
 Using a minimal image also presents cold-boot times in an idealistic
 environment, as a heavier image would take longer to boot. We therefore show
 that our implementation offers substantial start time improvements over even
-the best case scenario of cold-booting.
+best case cold-boot scenarios.
 
 \subsection{Benchmarks}
 
@@ -29,27 +29,22 @@ the best case scenario of cold-booting.
 machine with the time taken to fork a virtual machine, we run several
 experiments to test the time for a VM to fork. These tests start a virtual
 machine, run basic userspace initialization, and then fork. The child VMM marks
-a timestamp once it finishes restoring KVM state. Figure~\ref{fig:fork-time}
-shows the fork time as recorded by the child VM for varying amounts of
-allocated guest memory.
+a timestamp once it finishes restoring KVM state.
 
 As memory is duplicated through copy-on-write in a Linux fork, memory is not
 physically copied to the child process unitl it is modified. However, it still
 takes time to walk through the parent page table and mark shared memory as
-read-only, and generate page tables for the child process. For this reason we
+read-only and to generate page tables for the child process. For this reason we
 expect to see fork times increase with the amount of memory allocated to the
-virtual machine.
+virtual machine. We compare the results of this fork time benchmark with the
+time to cold-boot a VM.
 
-We compare the results of this fork time benchmark with the time to cold-boot a
-VM.
-
-\Paragraph{Copy-on-Write} Though cloning VMs using fork can decrease
-VM start times by orders of magnitude, the guest memory mapped in the parent
-and child virtual machine share physical pages until modified. As a result,
-modifications to memory in each of the virtual machines can trigger page faults
-and memory copies that may degrade performance. We implement a benchmark to
-isolate the performance degradation caused by copy-on-write operations after
-cloning.
+\Paragraph{Copy-on-Write} Though cloning VMs using fork can decrease VM start
+times considerably, the guest memory mapped in the parent and child virtual
+machine share physical pages until modified. As a result, modifications to
+memory in each of the virtual machines can trigger page faults and memory
+copies that may degrade performance. We implement a benchmark to isolate the
+performance degradation caused by copy-on-write operations after cloning.
 
 This program begins by allocating some amount of memory, and writes 128 bytes
 of random data to each 4096-byte page allocated. This forces pages to be
@@ -68,17 +63,17 @@ started, any relevant state is loaded, and the user-supplied function is run.
 These services mostly use managed runtimes like NodeJS and Python. To simulate
 a small latency-sensitive workload, we use the numpy FFT correctness test,
 which runs in approximately $2.5$ seconds. This represents a somewhat long
-latency sensitive workload, and captures the typical scenario of a function
+latency-sensitive workload, and captures the typical scenario of a function
 which starts an interpreter, loads external libraries, and performs a CPU-bound
 computation.
 
 We compare the total time of starting 64 separate VMs, and letting each run the
-benchmark to completion, with the total time of forking 63 VMs from one
-reference image and letting them run to completion. We consider the total CPU
-time savings of starting each of these VMs by forking instead of booting. We
-also consider a variety of different fork points, including immediately after
-boot, after python loads, and after packages are loaded. We also verify that
-benchmark performance is not degraded by the forking process.
+benchmark to completion, with the total time of forking an equal number of VMs
+from one reference image and letting them run to completion. We consider the
+total CPU time savings of starting each of these VMs by forking instead of
+booting. We also consider a variety of different fork points, including
+immediately after boot, after python loads, and after packages are loaded. We
+also verify that benchmark performance is not degraded by the forking process.
 
 \subsection{Results}
 
@@ -319,7 +314,7 @@ triggered.
 
 
 \Paragraph{Python Function} Figure~\ref{fig:pycpu} displays the cumulative CPU
-time required for the python benchmark. The margin of error are negligible
+time required for the python benchmark. The margins of error are negligible
 (less than $0.2$\%). We see a significant improvement when forking compared to
 booting 64 independent virtual machines. Forking after boot immediately results
 in a $24.8$\% CPU time savings across the 64 benchmarks. Forking after starting
@@ -329,7 +324,7 @@ virtual machines can result in significant resource savings for servers running
 short duration or latency sensitive serverless workloads. This effect would be
 accentuated for shorter jobs and more minor for longer ones.
 
-Furthermore, figure~\ref{fig:pybench} shows the mean benchmark completion times
+Furthermore, Figure~\ref{fig:pybench} shows the mean benchmark completion times
 for each forking scheme. Interestingly, we do not observe any performance
 degradation when forking instead of booting. In fact, forking exhibits a slight
 (but statistically significant) reduction in benchmark completion time. We

@@ -53,13 +53,13 @@ then the guest kernel must be loaded from disk and initialized in guest memory.
 The guest kernel will then boot, and finally the function runtime can be
 started and the request handled.
 
-\Paragraph{Flash Cloning} Three significant parts of VM creation include (1)
+\Paragraph{Flash-Cloning} Three significant parts of VM creation include (1)
 loading the kernel into memory, (2) booting the guest kernel, and (3) loading
 potentially large libraries and runtimes. Management operations within the VMM
 such as virtual device creation and resource allocation are relatively cheap
 compared to a guest's boot time. Optimizing these steps could dramatically
 reduce the startup latency of new serverless functions. One technique to do so
-is to employ \emph{flash cloning}. Instead of loading VM images from disk and
+is to employ \emph{flash-cloning}. Instead of loading VM images from disk and
 booting a kernel, we propose cloning existing reference VMs in memory.
 Additionally, we propose a copy-on-write mechanism to reduce both the copy time
 and the memory pressure of packing many VMs onto one host. This method can be

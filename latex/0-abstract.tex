@@ -6,7 +6,7 @@ computations in response to certain triggers. In most common severless
 deployments, computations are executed in virtual machines. As a result, the
 boot time of a virtual machine is a primary component of these services'
 latency. We propose an alternative paradigm, in which incoming requests trigger
-a flash clone of an existing, pre-booted virtual machine. Our implementation
+a flash-clone of an existing, pre-booted virtual machine. Our implementation
 HyperFork builds on top of KVM and utilizes the copy-on-write functionality of
 the fork system call to improve performance. We demonstrate that HyperFork
 improves virtual machine start times by nearly two orders of magnitude while

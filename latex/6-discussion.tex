@@ -46,9 +46,9 @@ supported. Additionally, kvmtool has an outstanding bug in its terminal
 emulation that manifests in degraded performance after forking. We have worked
 around this in our current implementation.
 
-Additionally, there is an outstanding race condition in the kvm-clock feature,
-a paravirtualized clock accessible from the guest virtual machine. This
-manifests itself as occasional non-monotonicity in the guest, causing prolonged
+Additionally, there is an race condition in the kvm-clock feature, a
+paravirtualized clock accessible from the guest virtual machine. This manifests
+itself as occasional non-monotonicity in the guest, causing prolonged
 kernel-level stalls in the guest virtual machine. For our tests, we have
 disabled kvm-clock to avoid these problems. We suspect it can be resolved by
 careful adjustment of the clock when restoring virtual machine state.
