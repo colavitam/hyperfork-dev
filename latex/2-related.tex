@@ -29,18 +29,18 @@ kvmtool~\cite{kvmtool}, or Amazon's Firecracker~\cite{firecracker}.
 
 \Paragraph{Cold-start Reduction Efforts} A number of different techniques have
 been proposed to reduce cold-start latencies. One broad technique is to reduce
-the size and complexity of VMs which are used for serverless functions. Because
-serverless functions running in a cloud infrastructure run on a fairly limited
-and standard set of physical machines, the number of specialized drivers and
-kernel modules required to support this hardware is vastly smaller than that in
-a standard distribution.  Additionally, because the function will only need to
-run a single process, a number of other optimizations can be made to reduce
-kernel size and boot time. Amazon utilizes such a stripped down kernel in their
-Firecracker VMM~\cite{firecracker}. These kinds of operating system
-optimizations have also been explored previously in a more extreme form, with
-Unikernels~\cite{unikernels} and the Denali OS~\cite{denali}, where operating
-system features are treated as dependencies of userland programs and included
-conditionally.
+the size and complexity of the VM images which are used for serverless
+functions. Because serverless functions in a cloud infrastructure run on
+a fairly limited and standard set of physical machines, the number of
+specialized drivers and kernel modules required to support this hardware is
+vastly smaller than that in a standard distribution.  Additionally, because the
+function will only need to run a single process, a number of other optimizations
+can be made to reduce kernel size and boot time. Amazon utilizes such a stripped
+down kernel in their Firecracker VMM~\cite{firecracker}. These kinds of
+operating system optimizations have also been explored previously in a more
+extreme form, with Unikernels~\cite{unikernels} and the Denali OS~\cite{denali},
+where operating system features are treated as dependencies of userland programs
+and included conditionally.
 
 Other approaches to efficient resource isolation put the isolation boundary
 above the operating system level. Containerization technologies such as
@@ -54,14 +54,13 @@ Another technique for reducing VM creation latencies involves the process of
 This is an analogous process to forking processes within Linux. One work which
 had success with this technique was the Potemkin Virtual
 Honeyfarm~\cite{potemkin}. Lightweight VMs were created as Honeypots for
-catching security vulnerabilities in cloud applications. This work successfully
-implements flash-cloning within the Xen hypervisor~\cite{xen} along with
-copy-on-write memory sharing, but focuses on VM density rather than start-up
-latency. We implement flash-cloning within a KVM based infrastructure to more
-closely match with industry standard serverless infrastructure, Amazon
-Firecracker~\cite{firecracker}, and with the goals of minimizing start-up
-latency and utilizing native copy-on-write functionality within the Linux
-kernel.
+catching security vulnerabilities in cloud applications. Potemkin implements
+flash-cloning within the Xen hypervisor~\cite{xen} along with copy-on-write
+memory sharing, but focuses on VM density rather than start-up latency. We
+implement flash-cloning within a KVM based infrastructure to more closely match
+with industry standard serverless infrastructure and with the goals of
+minimizing start-up latency and utilizing native copy-on-write functionality
+within the Linux kernel.
 
 \Paragraph{VM Live Migration} Flash-cloning relates very closely to the more
 mature virtualization technology of VM live
@@ -71,6 +70,6 @@ live migration in general contains a superset of the functionality needed for
 flash-cloning, but is focused on efficiently supporting the migration of VM
 state across a slow network with minimal interruption to the VM. For serverless
 computing infrastructure, we are focused on extremely low latency and therefore
-do not want the complex techniques used for live-migration. We rely on many
+do not want the complex techniques used for live-migration. However, we rely on
 features pioneered by live migration research in order to efficiently duplicate
 virtual machine state.

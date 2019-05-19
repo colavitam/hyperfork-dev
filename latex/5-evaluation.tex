@@ -46,10 +46,10 @@ memory in each of the virtual machines can trigger page faults and memory
 copies that may degrade performance. We implement a benchmark to isolate the
 performance degradation caused by copy-on-write operations after cloning.
 
-This program begins by allocating some amount of memory, and writes 128 bytes
-of random data to each 4096-byte page allocated. This forces pages to be
-allocated by the host kernel. It then signals to the host, which forks the VM.
-In each child the program then performs an additional pass, again writing
+This program begins by requesting some amount of memory using mmap, then writes
+128 bytes of random data to each 4096-byte page allocated. This forces pages to
+be allocated by the host kernel. Next it signals to the host, which forks the
+VM. Finally in each child the program performs an additional pass, again writing
 random data to each of those pages.
 
 Each of those post-fork writes will trap into the host kernel and induce a
@@ -58,7 +58,7 @@ memory passes. We compare passes that trigger a page fault (either due to
 allocation pre-fork, or copying post-fork). We also compare passes that do not
 trigger a page fault (both pre-fork and post-fork).
 
-\Paragraph{Python Function} In the lifecycle of a typical FaaS request, a VM is
+\Paragraph{Python Function} In the lifecycle of a typical FaaS request a VM is
 started, any relevant state is loaded, and the user-supplied function is run.
 These services mostly use managed runtimes like NodeJS and Python. To simulate
 a small latency-sensitive workload, we use the numpy FFT correctness test,
@@ -72,8 +72,9 @@ benchmark to completion, with the total time of forking an equal number of VMs
 from one reference image and letting them run to completion. We consider the
 total CPU time savings of starting each of these VMs by forking instead of
 booting. We also consider a variety of different fork points, including
-immediately after boot, after python loads, and after packages are loaded. We
-also verify that benchmark performance is not degraded by the forking process.
+immediately after boot, after python loads, and after packages are
+loaded. Finally, we verify that benchmark performance is not degraded by the
+forking process.
 
 \subsection{Results}
 
@@ -144,7 +145,7 @@ also verify that benchmark performance is not degraded by the forking process.
   \label{fig:boot-time}
 \end{figure*}
 
-\Paragraph{Fork Time} Figure~\ref{fig:boot-time} shows our measurement results
+\Paragraph{Fork Time} Figure~\ref{fig:boot-time} shows the results
 for our fork and boot time benchmarks. Error bars indicate the $2.5$- and
 $97.5$-percentiles. Using the small image constructed for our benchmarks, we
 observed boot times of approximately $563$ ms for a $512$ MB virtual machine.
@@ -300,7 +301,7 @@ forking eliminates more than $95$\% of the boot time.
 of our copy-on-write test. Each graph shows the performance before and after
 the fork operation. Error bars indicate $2.5$- and $97.5$-percentiles. When
 memory writes do not trigger a page fault (left plot), performance does not
-appear to change before or after a page fault. This means that after pages have
+appear to change before or after a fork. This means that after pages have
 been allocated (or reallocated after being copied on write), there is no
 significant memory performance penalty.
 
@@ -324,7 +325,7 @@ virtual machines can result in significant resource savings for servers running
 short duration or latency sensitive serverless workloads. This effect would be
 accentuated for shorter jobs and more minor for longer ones.
 
-Furthermore, Figure~\ref{fig:pybench} shows the mean benchmark completion times
+Figure~\ref{fig:pybench} shows the mean benchmark completion times
 for each forking scheme. Interestingly, we do not observe any performance
 degradation when forking instead of booting. In fact, forking exhibits a slight
 (but statistically significant) reduction in benchmark completion time. We

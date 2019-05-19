@@ -53,11 +53,7 @@ then the guest kernel must be loaded from disk and initialized in guest memory.
 The guest kernel will then boot, and finally the function runtime can be
 started and the request handled.
 
-\Paragraph{Flash-Cloning} Three significant parts of VM creation include (1)
-loading the kernel into memory, (2) booting the guest kernel, and (3) loading
-potentially large libraries and runtimes. Management operations within the VMM
-such as virtual device creation and resource allocation are relatively cheap
-compared to a guest's boot time. Optimizing these steps could dramatically
+\Paragraph{Flash-Cloning} Optimizing these steps could dramatically
 reduce the startup latency of new serverless functions. One technique to do so
 is to employ \emph{flash-cloning}. Instead of loading VM images from disk and
 booting a kernel, we propose cloning existing reference VMs in memory.
@@ -66,15 +62,15 @@ and the memory pressure of packing many VMs onto one host. This method can be
 compared to the Unix fork abstraction.
 
 \Paragraph{HyperFork} To create a new, isolated virtual machine, we propose to
-re-create only the necessarily distinct VMM components while cloning
-initialized guest memory and execution context pre-booted virtual machines.
+re-create only the necessarily distinct VMM components while cloning the
+initialized guest memory and execution context of pre-booted virtual machines.
 From this insight we present \emph{HyperFork}, a KVM-based VM cloning
 implementation for serverless computing. We demonstrate that HyperFork
 outperforms standard VM creation latencies by up to two orders of magnitude. We
-further present a thorough analysis of the potential performance degradation
-due to copy-on-write memory sharing. We further demonstrate that
-latency-sensitive workloads display a marked improvement in overall resource
-utilization without degraded performance.
+further present a thorough analysis of the potential performance degradation due
+to copy-on-write memory sharing, and demonstrate that latency-sensitive
+workloads display a marked improvement in overall resource utilization without
+degraded performance.
 
 Our implementation is open source and available on Github at
 \href{https://github.com/colavitam/hyperfork-kvmtool}{colavitam/hyperfork-kvmtool}.

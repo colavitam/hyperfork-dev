@@ -38,20 +38,20 @@ heavier VMM solutions such as QEMU~\cite{qemu}, which supports a wide range of
 legacy devices and guest configurations.
 
 We selected kvmtool as our userspace VMM as it offers a very similar set of
-functionality to Firecracker, the VMM used to power Amazon Lambda. Both VMMs
-are minimal KVM-based implementations which make serverless sandboxes easy to
-deploy on Linux environments. By using simple and minimalistic implementations,
-startup times and memory footprints are minimized. For increased security in
-the cloud, Firecracker uses strict containerization schemes on top of
-virtualization-based sandboxing and is implemented in Rust. Firecracker offers
-a RESTful API for VM creation and management, and provides no other ways to
-communicate with a guest VM. In contrast, kvmtool uses simple IPCs to
-communicate and manage guest VMs.
+functionality to Firecracker, the VMM used to power Amazon Lambda. Both VMMs are
+minimal KVM-based implementations which make serverless sandboxes easy to deploy
+on Linux environments. By using simple and minimalistic implementations, startup
+times and memory footprints are minimized. For increased security in the cloud,
+Firecracker uses strict containerization schemes on top of virtualization-based
+sandboxing and is implemented in Rust. Firecracker offers a RESTful API for VM
+creation and management, and provides no other ways to communicate with a guest
+VM. In contrast, kvmtool uses a simple command line interface and IPCs to
+communicate with and manage guest VMs.
 
 We chose kvmtool over Firecracker because we found that Firecracker was more
 difficult to work with due to its Rust codebase and containerization schemes.
 kvmtool provides a minimal platform on which to test HyperFork applied to Linux
-guests and closely approximates the VMM of an industrial serverless platform.
+guests while closely approximating the VMM of an industrial serverless platform.
 
 To virtualize efficiently, kvmtool makes use of a number of threads for
 managing vCPUs and emulated devices. Userspace bookkeeping data structures hold

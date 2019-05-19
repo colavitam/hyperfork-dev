@@ -10,16 +10,15 @@ For a KVM-based virtualization platform, flash-cloning requires duplicating
 several pieces of VM state. Where possible, we aim to make heavy use of the
 Linux fork operation to duplicate this state, as it is highly optimized and
 provides copy-on-write functionality for duplicated pages. Specifically, guest
-memory will be duplicated with copy-on-write functionality so that the backing
-pages are not copied for the child unless necessary. However, fork leaves
-kernelspace management state unduplicated, cannot duplicate all userspace VMM
-threads, and leaves userspace bookkeeping file descriptors pointing to the
-parent process's KVM management structures, which are inaccessible in the
-child.
+memory will be shared between the parent and child processes, and will only be
+copied if written to. However, the fork system call alone leaves kernelspace
+management state unduplicated, cannot duplicate all userspace VMM threads, and
+leaves userspace bookkeeping file descriptors pointing to the parent process's
+KVM management structures, which are inaccessible in the child.
 
 Duplicating kernel state can either be performed within the kernel, by
 coping in-kernel data structures, or in userspace by extracting and saving
-guest specific state in memory before forking. We predict a kernel
+guest-specific state in memory before forking. We predict a kernel
 implementation may have slightly higher performance, but for simplicity we
 implement our flash-cloning entirely in userspace within kvmtool.\footnote{Note
 that a kernel implementation would also need to update file descriptors and
@@ -59,21 +58,21 @@ execution proceeds. In the child, the post-fork routine is invoked, performing
 the following to reconstruct necessary VMM state:
 
 \begin{enumerate}
-\item Acquires new file descriptors for the KVM device and virtual machine
-\item Creates new file descriptors for the vCPUs
-\item Restores individual and global vCPU state\footnote{In the process of
+\item Acquire new file descriptors for the KVM device and virtual machine
+\item Create new file descriptors for the vCPUs
+\item Restore individual and global vCPU state\footnote{In the process of
 restoring this state, we encountered a bug in how KVM handles setting the
 control registers when they change whether the guest is in long mode. We intend
 to investigate this further and report it if necessary.}
-\item Replaces all eventfds used for signaling
-\item Creates new threads to handle devices and the execution of each vCPU
-\item Releases all mutexes locked in the pre-fork routine, and replaces all
+\item Replace all eventfds used for signaling
+\item Create new threads to handle devices and the execution of each vCPU
+\item Release all mutexes locked in the pre-fork routine, and replace all
 condition variables\footnote{Condition variables must be replaced, as in many
 pthread implementations they contain an internal mutex that cannot be locked in
 the pre-fork routine. If this mutex is locked by another thread when the IPC
 thread performs the fork, the mutex will be permanently locked in the child
 process.}
-\item Attaches the terminal device to a new pseudo-terminal, or detaches it to
+\item Attach the terminal device to a new pseudo-terminal, or detach it to
 accept no further input\footnote{Due to a bug in kvmtool, operating with a
 pseudoterminal with no slave is not supported.}
 \end{enumerate}

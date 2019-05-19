@@ -5,7 +5,7 @@
 Our fork time benchmarks demonstrate an improvement of roughly two orders of
 magnitude in VM start time. This can shave hundreds of milliseconds off of
 serverless latencies and make serverless a more attractive platform for
-latency-sensitive workloads, such as web hosting. Furthermore, we observe some
+latency-sensitive workloads such as web hosting. Furthermore, we observe some
 overhead from copy-on-write page faults, but note that these overheads are a
 one-time cost per virtual machine: once a page is duplicated, further writes do
 not incur duplication overhead. Furthermore, when booting a virtual machine,
