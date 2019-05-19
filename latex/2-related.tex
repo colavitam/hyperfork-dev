@@ -43,21 +43,27 @@ still an active area of research, with many improvements to be
 made~\cite{peeking}\cite{trilemma}\cite{steps-back}.
 
 % TODO: we need to make the distinction between unikernels and Amazon-style microkernels more clear; we seem to conflate them here
-\Paragraph{Cold-start Reduction Efforts} There exist a number of different
-techniques which have been proposed in order to reduce cold-start
-latencies. One broad technique is to reduce the size and complexity of VMs
-which are used for serverless functions. Because serverless functions running
-in a cloud infrastructure run on a fairly limited and standard set of physical
-machines, the number of specialized drivers and kernel modules required to
-support this hardware is vastly smaller than that in a standard distribution.
-Additionally, because the function will only need to run a single process, a
-number of other optimizations can be made to reduce kernel size and boot time.
-These kinds of operating system optimizations have been explored previously
-with Unikernels~\cite{unikernels}, the Denali OS~\cite{denali}, and are
-represented in Amazon's custom $\mu$-Kernel and their serverless KVM VMM
-Firecracker~\cite{firecracker}.
+\Paragraph{Cold-start Reduction Efforts} A number of different techniques have
+been proposed to reduce cold-start latencies. One broad technique is to reduce
+the size and complexity of VMs which are used for serverless functions. Because
+serverless functions running in a cloud infrastructure run on a fairly limited
+and standard set of physical machines, the number of specialized drivers and
+kernel modules required to support this hardware is vastly smaller than that in
+a standard distribution.  Additionally, because the function will only need to
+run a single process, a number of other optimizations can be made to reduce
+kernel size and boot time. Amazon utilizes such a stripped down kernel in their
+Firecracker VMM~\cite{firecracker}. These kinds of operating system
+optimizations have also been explored previously in a more extreme form, with
+Unikernels~\cite{unikernels} and the Denali OS~\cite{denali}, where there is no
+real division between operating system and application code.
 
-% TODO: what about docker, cgroups, etc. that avoid using VMs at all?
+% TODO: citations
+Other approaches to efficient resource isolation put the isolation boundary
+above the operating system level. Containerization technologies such as
+Docker~\cite{docker} utilize Linux cgroups~\cite{cgroups} and seccomp mechanism
+to isolate processes. While these offer very fast startup times compared to
+Virtual Machines, they are a weaker form of isolation, as processes in
+containers still share a kernel.
 
 Another technique for reducing VM creation latencies involves the process of
 \emph{flash-cloning}, in which new VMs are cloned from existing reference VMs.
