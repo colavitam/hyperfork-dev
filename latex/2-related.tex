@@ -3,32 +3,31 @@
 \section{Related Work} \label{sec:related}
 Our work in this paper draws on concepts from several lines of past research.
 
-% TODO: I'm not convinced the history in this paragraph adds anything to the paper
-\Paragraph{Virtualization Technology} Machine virtualization technology is
-a complex and diverse space. Classical Hypervisors/Virtual Machine Monitors
-(VMMs) relied on the fundamental primitive of \emph{Trap-and-Emulate}, where
-sensitive instructions in the guest would be trapped by the hardware, and
-emulated safely within the VMM using shadow structures for privileged
-state~\cite{classic-virt}. In x86 however, not all sensitive instructions are
-privaleged, meaning some cannot be trapped, and other techniques must also be used
-to enable virtualization. \emph{Full virtualization} of unmodified guest
-kernels was enabled through binary translation, where all sensitive
-instructions could be translated into privileged instructions.
-\emph{Paravirtualization} used modifications to the guest operating systems to
-ensure sensitive operations were trapped. Today, modern hardware architectures
-include special virtualization instructions which remove the need for binary
-translation, and additionally remove the need for performance critical shadow
-structures using two-dimensional hardware page tables~\cite{virt-techniques}.
-Current virtualization technologies offer a mix of all these techniques,
-including binary translation for full nested virtualization using Oracle's
-HVX~\cite{hvx}, paravirtualization with Xen~\cite{xen}, and classic
-trap-and-emulate utilizing modern hardware extensions and the QEMU x86
-emulator~\cite{qemu} within the Linux kernel with KVM~\cite{kvm}. Xen is highly
-used within the research community because of its relatively simple
-software-only techniques, and KVM is valued for its tight integration with the
-Linux kernel.
+\Paragraph{Virtualization Technology} Virtualization technologies simulate the
+physical resources of hardware in a software environment. This allows multiple
+full operating system and application stacks to be hosted on one physical
+machine. Virtualization has numerous benefits, including improving utilization
+for hosting providers who can pack many virtual machines onto one physical
+machine, providing a strong isolation boundary between mutually untrusting
+entities as co-located VMs cannot even name each others resources, and adding a
+layer of fault tolerance since VMs are not tied to a specific set of hardware
+and can be moved if a physical machine fails. Modern instruction set extensions
+from Intel and AMD provide hardware-level support for
+virtualization.~\cite{virt-techniques}
 
-% TODO: we need to make the distinction between unikernels and Amazon-style microkernels more clear; we seem to conflate them here
+A hypervisor is an entity which runs with full privilege on the host system and
+coordinates virtual machine guests. The Xen hypervisor~\cite{xen}, which is
+widely used in the research community, takes the place of a host operating
+system, and coordinates paravirtualized guests\footnote{The
+\emph{paravirtualization} technique allows all guest instructions to run on the
+bare metal, but requires modifications to the guest operating system. This is
+contrasted with \emph{full virtualization}, where every instruction is emulated
+by the hypervisor, or \emph{trap-and-emulate}, where only privileged
+instructions are emulated.} through its special guest called Domain-0. The Linux
+kernel supports virtualization through the module KVM~\cite{kvm}, which can be
+used through user-mode Virtual Machine Monitors such as QEMU~\cite{qemu},
+kvmtool~\cite{kvmtool}, or Amazon's Firecracker~\cite{firecracker}.
+
 \Paragraph{Cold-start Reduction Efforts} A number of different techniques have
 been proposed to reduce cold-start latencies. One broad technique is to reduce
 the size and complexity of VMs which are used for serverless functions. Because
