@@ -6,18 +6,20 @@
 We now describe the architecture and implementation of Hyperfork, along with
 our design decisions regarding the flash-cloning operation.
 
-For our KVM based virtualization platform, flash-cloning requires duplicating
+For a KVM-based virtualization platform, flash-cloning requires duplicating
 several pieces of VM state. Where possible, we aim to make heavy use of the
-linux fork operation to duplicate this state, as it is highly optimized and
+Linux fork operation to duplicate this state, as it is highly optimized and
 provides copy-on-write functionality for duplicated pages. Specifically, guest
 memory will be duplicated with copy-on-write functionality so that the backing
 pages are not copied for the child unless necessary. However, fork leaves
 kernelspace management state unduplicated, cannot duplicate all userspace VMM
 threads, and leaves userspace bookkeeping file descriptors pointing to the
 parent process's KVM management structures, which are inaccessible in the
-child. Duplicating kernel state can either be performed within the kernel, by
+child.
+
+Duplicating kernel state can either be performed within the kernel, by
 coping in-kernel data structures, or in userspace by extracting and saving
-guest specific state in userspace before forking. We predict a kernel
+guest specific state in memory before forking. We predict a kernel
 implementation may have slightly higher performance, but for simplicity we
 implement our flash-cloning entirely in userspace within kvmtool.\footnote{Note
 that a kernel implementation would also need to update file descriptors and
@@ -29,8 +31,8 @@ enable our experimental evaluations.
 
 Our userspace HyperFork implementation for kvmtool proceeds in a series of
 phases. At a high level, these phases are a triggering event, pre-fork
-extraction and saving of kernel state, forking, and post-forking reconstruction
-of VMM management state in the child.
+extraction of kernel state, forking, and post-fork reconstruction of VMM
+management state in the child.
 
 First, the fork is triggered, either by an administrator invoking the
 \texttt{FORK} IPC via the command line interface, or by the guest sending a
@@ -63,7 +65,7 @@ the following to reconstruct necessary VMM state:
 restoring this state, we encountered a bug in how KVM handles setting the
 control registers when they change whether the guest is in long mode. We intend
 to investigate this further and report it if necessary.}
-\item Replaces all eventfds used for signalling
+\item Replaces all eventfds used for signaling
 \item Creates new threads to handle devices and the execution of each vCPU
 \item Releases all mutexes locked in the pre-fork routine, and replaces all
 condition variables\footnote{Condition variables must be replaced, as in many
@@ -77,11 +79,7 @@ pseudoterminal with no slave is not supported.}
 \end{enumerate}
 
 Once the post-fork routine is complete, the vCPUs begin executing in the child
-and the flash-clone operation is complete. We can also note that the original
-thread in the parent which performed the forking operation was the IPC handling
-thread. In the child, this thread creates a new IPC handling thread and then
-assumes the role of the main kvmtool run thread, waiting on the guest vCPU0 to
-exit and then terminating the VM gracefully.
+and the flash-clone operation is complete.
 
 \subsection{Guest-to-Host Signaling}
 
