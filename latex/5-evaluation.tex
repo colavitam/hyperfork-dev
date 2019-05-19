@@ -29,18 +29,20 @@ the best case scenario of cold-booting.
 % TODO: for each of these, we should justify why the benchmark is necessary
 \Paragraph{Fork Time}
 We run several experiments to test the time for a VM to fork. These tests start
-a virtual machine, allocate some memory, and then fork.  The forking process
-marks a timestamp when its fork call returns, and the child marks a timestamp
-once it finishes restoring KVM state.  Figure~\ref{fig:fork-time} shows the
-fork time as recorded by the child VM for varying amounts of allocated guest
-memory.
+a virtual machine, allocate some memory, and then fork. The child process marks
+a timestamp once it finishes restoring KVM state.  Figure~\ref{fig:fork-time}
+shows the fork time as recorded by the child VM for varying amounts of allocated
+guest memory.
 
-Even though memory is not copied to the child process unless it is written, it
-still takes time to walk through the parent page table and mark shared memory
-as read-only, and generate page tables for the child process. For this reason
-we expect to see fork times scale roughly linearly with the amount of memory
-allocated pre-fork. Allocating more memory simulates a VM with more programs
-and libraries loaded.
+Even though memory is not physically copied to the child process unless it is
+written, it still takes time to walk through the parent page table and mark
+shared memory as read-only, and generate page tables for the child process. For
+this reason we expect to see fork times scale roughly linearly with the amount
+of memory allocated pre-fork. Allocating more memory simulates a VM with more
+programs and libraries loaded.
+
+We compare the results of this fork time benchmark with the time to cold-boot a
+VM.
 
 \Paragraph{Copy-on-Write Benchmark} Though cloning VMs using fork can decrease
 VM start times by orders of magnitude, the guest memory mapped in the parent
@@ -50,10 +52,11 @@ virtual machines can trigger page faults and memory copies that may degrade
 performance. We implement a benchmark to isolate the performance degradation
 caused by copy-on-write operations after cloning.
 
-This program begins by allocating $p$ pages of memory, and writes $b$ bytes of
-random data to each one. This forces pages to be allocated by the host kernel.
-It then signals to the host, which forks the VM. In each child the program then
-performs an additional pass, again writing random data to each of those pages.
+This program begins by allocating some amount of memory, and writes 128 bytes of
+random data to each 4096-byte page allocated. This forces pages to be allocated
+by the host kernel.  It then signals to the host, which forks the VM. In each
+child the program then performs an additional pass, again writing random data to
+each of those pages.
 
 Each of those post-fork writes will trap into the host kernel and induce a
 copy. To assess copy-on-write overhead, we measure the time for each of these
