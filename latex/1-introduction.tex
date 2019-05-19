@@ -16,7 +16,6 @@ Functions. Several significant enterprise customers have moved parts of their
 services onto serverless platforms, including the news site The
 Guardian.\footnote{https://aws.amazon.com/solutions/case-studies/the-guardian/}.
 
-% TODO: edit
 \Paragraph{Serverless Infrastructure} The typical implementation of a
 serverless computing platform places user-submitted functions onto dynamically
 created Virtual Machines (VMs). These functions are intended to be light-weight
@@ -35,30 +34,32 @@ must be created for the function. Functions from different users are usually
 not placed in the same VM for security and isolation reasons, but one VM can
 host several instances of one user's function.
 
-% TODO: edit, and we need to cite numbers here to motivate our work
 \Paragraph{The Problem with Serverless: Cold-start} A central promise of
 serverless computing services is rapid scalability. Meeting this demand at
 scale requires that new function instances can be started very quickly to
 service incoming requests. This is easy when there exist currently running
-warm instances but more difficult when a new cold instance must
-be started. A major bottleneck in achieving low latency instance start-up and
-fast auto-scaling is the cold-start latency~\cite{peeking}. For cold-start, the
-major bottleneck is the creation of a new VM. After scheduling and
-provisioning, when a VM is created the host Hypervisor/Virtual Machine Monitor
-(VMM) must initialize virtual resources including CPUs, memory, and other
-devices, then the guest kernel and file system must be loaded from disk and
-initialized in guest memory, then the guest kernel is booted, and finally the
-function runtime/process is started and the request is handled.
+warm instances but more difficult when a new cold instance must be started.
+Prevous work has recorded Amazon Lambda warmstart latencies of around 25ms, and
+cold-start latencies of 250ms~\cite{peeking}. For cold-start, one significant
+bottleneck is the creation of a new VM. In the Amazon Firecracker
+specification~\cite{firecracker-spec}, new VMs are specified to boot in under
+125ms, a significant chunk of the coldstart latency. Pools or buffers of ready
+VMs may help, but to approach warmstart latencies, improvement in VM creation
+latencies will be needed. To create a VM, the host Hypervisor/Virtual Machine
+Monitor (VMM) must initialize virtual resources including CPUs, memory, and
+other devices, then the guest kernel must be loaded from disk and initialized
+in guest memory, then the guest kernel must be booted, and finally the function
+runtime/process can be started and the request handled.
 
-% TODO: edit, (1) is misleading, as the filesystem doesn't need to be loaded into memory
-\Paragraph{Flash Cloning} The most significant parts of VM creation are (1)
-copying the kernel and file system into memory, (2) booting the guest kernel,
+\Paragraph{Flash Cloning} Three significant parts of VM creation include (1)
+loading the kernel into memory, (2) booting the guest kernel,
 and (3) loading potentially large libraries/runtimes. Management operations
-within the VMM are relatively cheap compared to the start-up within a guest and
-the copying of guest memory. Optimizing these steps could dramatically reduce
-the startup latency of new serverless functions. One technique to do this is to
-employ \emph{flash cloning}. Instead of loading VM images from disk and booting
-a kernel, we propose cloning existing reference VMs in memory. Additionally, we
+within the VMM such as virtual device creation and resource allocation are
+relatively cheap compared to the start-up within a guest and the copying of
+guest memory. Optimizing these steps could dramatically reduce the startup
+latency of new serverless functions. One technique to do this is to employ
+\emph{flash cloning}. Instead of loading VM images from disk and booting a
+kernel, we propose cloning existing reference VMs in memory. Additionally, we
 propose a copy-on-write mechanic to reduce both the copy time overhead and the
 memory pressure of packing many VMs onto one host. This method can be compared
 to the Unix fork abstraction.
@@ -75,13 +76,11 @@ implementation for the context of serverless computing.
 
 \Paragraph{Contributions} Our contributions are as follows:
 \begin{itemize}
-\item HyperFork, A KVM-based virtual machine cloning implementation which outperforms
-standard VM creation latencies by up to two orders of magnitude
-\item A thorough discussion of the trade-offs related to a number of potential
-implementations for VM creation in the context of serverless computing % TODO: what?
+\item HyperFork, A KVM-based virtual machine cloning implementation which
+outperforms standard VM creation latencies by up to two orders of magnitude
 \item A thorough analysis of the performance of Hyperfork for both VM creation
-latency as well as VM co-location density and performance degredation with
-respect to copy-on-write memory sharing % TODO: colocation density?
+latency as well as performance degredation with respect to copy-on-write memory
+sharing
 \end{itemize}
 
 Our implementation and benchmarks are open source and available at %TODO: link
