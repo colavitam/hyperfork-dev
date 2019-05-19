@@ -23,6 +23,12 @@ kernel-level stalls in the guest virtual machine. For our tests, we have
 disabled kvm-clock to avoid these problems. We suspect it can be resolved by
 careful adjustment of the clock when restoring virtual machine state.
 
+We have made no attempts to support architectures other than 32/64-bit x86. As
+some serverless deployments begin to utilize ARM for certain workloads, support
+for other architectures is becoming increasingly important. We do not
+anticipate much difficulty in porting our implementation to other architectures
+due to the regularity of the KVM API.
+
 \Paragraph{Additional Research}
 
 HyperFork currently does not handle very many devices. A deployable HyperFork

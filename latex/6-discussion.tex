@@ -1,8 +1,42 @@
-% !TEX root = top.tex
-% above command is so that compilation is always from top.texThis is the conclusions section
+% !TEX root = top.tex above command is so that compilation is always from
+% top.texThis is the conclusions section
 \section{Discussion} \label{sec:discussion}
-% TODO: analyze results, hypothesize on causes and solutions, and say how great they are
 
-% TODO: Boot time: we're greater than Firecracker by a lot
+Our fork time benchmarks demonstrate an improvement of roughly two orders of
+magnitude in VM start time. This can shave hundreds of milliseconds off of
+serverless latencies and make serverless a more attractive platform for
+latency-sensitive workloads, such as web hosting. Furthermore, we observe some
+overhead from copy-on-write page faults, but note that these overheads are a
+one-time cost per virtual machine: once a page is duplicated, further writes do
+not incur duplication overhead. Furthermore, when booting a virtual machine,
+writing to a page for the first time would trigger a page fault for allocation
+anyway. Therefore, the performance reduction is only relative to a page fault
+for allocation. Our benchmark estimates this overhead to be in the range of
+$28$--$33$\%.
 
-% TODO: Linear scaling for fork time: hugepages?
+We may be able to improve this result by duplicating pages in the background in
+a similar manner to Snowflock~\cite{snowflock}. Furthermore, with guest
+cooperation, the guest kernel can signal what pages are likely to be
+duplicated, such as those mapped writeable in userland processes. Additionally,
+some pages can avoid being copied at all, such as those used for the kernel
+slab allocator. We suspect these optimizations can reduce the overhead imposed
+by copy-on-write duplication.
+
+While we invested limited time in optimizing the Linux kernel we used for
+testing, we were not able to reproduce the reported $125$ ms boot time of
+Amazon's microVMs~\cite{firecracker-spec}. Though the time required for
+Hyperfork to fork a virtual machine is still considerably less than this,
+reproducing a microVM environment would provide a state-of-the-art baseline for
+comparison. It may also be instructive to benchmark start times for Docker and
+other alternative isolation methods.
+
+Furthermore, for virtual machines with larger memory footprints, the linear
+scaling of fork time cuts into performance improvements due to the large
+pagetables which must be duplicated. One potential solution is to use
+hugepages, a Linux feature that enables using page table mappings larger than
+the standard $4096$-byte pages. By using $2$ MB pages, we can reduce the number
+of mappings to be copied by a factor of $512$. This may significantly reduce
+the linear component of the fork operation. Note, however, that this may have
+implications for memory performance, as larger pages must be duplicated in
+their entirety in the case of a page fault (absent a more complex copy-on-write
+mechanism)~\cite{hugepages}.
