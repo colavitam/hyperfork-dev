@@ -196,8 +196,79 @@ and libraries loaded.
 \end{tikzpicture}
 \caption{Memory benchmark with and without copy-on-write ($n=100$)}
 \label{fig:rambench}
-
 \end{figure*}
+
+\pgfplotstableread[col sep=comma,trim cells=true]{pybench.tab}{\pytable}
+\pgfplotstableread[col sep=comma,trim cells=true]{pybenchtimes.tab}{\pytimetable}
+
+\pgfplotsset{compat=1.5}
+\begin{figure*}[t]
+  \center
+  \begin{tikzpicture}[trim axis left, trim axis right]
+    \begin{axis}[
+        width=0.45\textwidth,
+      title={Python Benchmark Cumulative CPU Usage},
+      xmin=0,xmax=240,
+      ytick=data,
+      symbolic y coords={None, After Boot, After Interpreter, After Packages},
+      ylabel={Fork Point},
+      xlabel={Cumulative CPU Time (s)},
+      xbar,
+      %bar width=7pt,
+      xmajorgrids=true,
+      grid style=dashed
+    ]
+      \addplot+[
+        error bars/.cd,
+      x dir=both, x explicit
+    ]
+      table [
+        y = mode,
+      x = total,
+      x error = moe,
+    ] {\pytable};
+    \end{axis}
+  \end{tikzpicture}
+  \label{fig:pybench}
+%\begin{tikzpicture}
+%\begin{axis}[
+%  width=0.45\textwidth,
+%  title={Python Benchmark Times},
+%  xmin=2,xmax=2.6,
+%	ytick=data,
+%  symbolic y coords={None, After Boot, After Interpreter, After Packages},
+%  xlabel={Cumulative CPU Time (s)},
+%	xbar,
+%	%bar width=7pt,
+%  xmajorgrids=true,
+%  grid style=dashed
+%]
+%\addplot+[
+%  error bars/.cd,
+%  x dir=both, x explicit
+%  ]
+%  table [
+%  y = mode,
+%  x = total,
+%  x error = moe,
+%  ] {\pytimetable};
+%\end{axis}
+%\end{tikzpicture}
+\caption{TODO: caption here}
+\end{figure*}
+
+\begin{figure}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    Fork Point & Benchmark Time (ms) & Relative Time \\ \hline
+    None & $2500 \pm 9.14$ & $100$\% \\ \hline
+    After Boot & $2433 \pm 8.36$ & $97.3$\% \\ \hline
+    After Interpreter & $2409 \pm 8.36$ & $96.4$\% \\ \hline
+    After Packages & $2401 \pm 8.04$ & $96.0$\% \\ \hline
+  \end{tabular}
+
+  \caption{Mean benchmark completion time (with $95$\% confidence interval)}
+\end{figure}
 
 \Paragraph{Copy-on-Write Test}
 
