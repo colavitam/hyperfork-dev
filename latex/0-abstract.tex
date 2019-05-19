@@ -1,4 +1,15 @@
 % !TEX root = top.tex
 % above command is so that compilation is always from top.tex
 
-A critical performance aspect of serverless computing is the response time of the platform to new requests. One major cause of this latency is the time it takes to spin up a new Virtual Machine image from disk. We propose \emph{HyperFork}, a VM flash cloning mechanism build on KVM, taking advantage of Linux's build-in Copy-on-Write support in the fork() system call. We show that forking a VM outperforms a cold boot by orders of magnitude, while taking an acceptable performance penalty due to Copy-on-Write traps after cloning.
+Serverless computing provides a convenient infrastructure for performing
+computations in response to certain triggers. In most common severless
+deployments, computations are executed in virtual machines. As a result, the
+boot time of a virtual machine is a primary component of these services'
+latency. We propose an alternative paradigm, in which incoming requests trigger
+a flash clone of an existing, pre-booted virtual machine. Our implementation
+HyperFork builds on top of KVM and utilizes the copy-on-write functionality of
+the fork system call to improve performance. We demonstrate that HyperFork
+improves virtual machine start times by nearly two orders of magnitude while
+maintaining throughput. We find that copy-on-write performance penalties are
+minimal for real-world workloads and suggest methods for further improving
+throughput.
