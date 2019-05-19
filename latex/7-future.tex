@@ -1,8 +1,3 @@
-% !TEX root = top.tex
-% above command is so that compilation is always from top.texThis is the conclusions section
-\section{Conclusions} \label{sec:conclusions}
-% TODO: summarize results and say how great they are
-
 \section{Future Work}
 
 \Paragraph{Limitations}
@@ -17,3 +12,4 @@
   \item There are several serious security concerns with cloning Virtual Machines in production. ASLR and KASLR are defeated, since the guest memory is copied exactly. It is also not desirable for two guest VMs to share a source of randomness, so any random generators would need to be re-seeded in the child VM.
   \item Firecracker boasts significant boot time improvements over existing hypervisor solutions. In our experiments we discovered that the configuration of the guest kernel can also affect boot times by an order of magnitude. We therefore would like to investigate whether Firecracker's performance improvements come from its inherent design and implementation or if it gains these benefits primarily by using stripped-down guest kernels and filesystem images.
 \end{itemize}
+
