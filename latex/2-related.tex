@@ -53,14 +53,13 @@ Another technique for reducing VM creation latencies involves the process of
 \emph{flash-cloning}, in which new VMs are cloned from existing reference VMs.
 This is an analogous process to forking processes within Linux. One work which
 had success with this technique was the Potemkin Virtual
-Honeyfarm~\cite{potemkin}. Lightweight VMs were created as Honeypots for
-catching security vulnerabilities in cloud applications. Potemkin implements
-flash-cloning within the Xen hypervisor~\cite{xen} along with copy-on-write
-memory sharing, but focuses on VM density rather than start-up latency. We
-implement flash-cloning within a KVM based infrastructure to more closely match
-with industry standard serverless infrastructure and with the goals of
-minimizing start-up latency and utilizing native copy-on-write functionality
-within the Linux kernel.
+Honeyfarm~\cite{potemkin}. Lightweight VMs were created as honeypots for
+detecting exploits in the wild. Potemkin implements flash-cloning within the
+Xen hypervisor~\cite{xen} along with copy-on-write memory sharing, but focuses
+on VM density rather than start-up latency. We implement flash-cloning within a
+KVM based infrastructure to more closely match with industry standard
+serverless infrastructure and with the goals of minimizing start-up latency and
+utilizing native copy-on-write functionality within the Linux kernel.
 
 \Paragraph{VM Live Migration} Flash-cloning relates very closely to the more
 mature virtualization technology of VM live
